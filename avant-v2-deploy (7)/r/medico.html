@@ -567,6 +567,18 @@ td.purple{color:var(--purple);font-weight:600}
 
 <script src="../assets/db.js"></script>
 <script>
+// ── UTILS ───────────────────────────────────
+function s(id, v)   { const el=document.getElementById(id); if(el) el.textContent=v||'—'; }
+function bar(id, v) { const el=document.getElementById(id); if(el) el.style.width=Math.min(v||0,100)+'%'; }
+function setPill(id, type, text) {
+  const el=document.getElementById(id); if(!el) return;
+  el.className='pill '+type; el.textContent=text;
+}
+const brl  = n => n ? 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
+const numK = n => { if(!n) return '—'; return n>=1000?(n/1000).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' mil':n.toLocaleString('pt-BR'); };
+const num  = n => n ? n.toLocaleString('pt-BR') : '—';
+const pct1 = n => n ? n.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}) : '0';
+
 // Lê slug e dados da URL
 const params = new URLSearchParams(window.location.search);
 const slug   = params.get('slug') || window.location.pathname.split('/').filter(Boolean).pop();
@@ -918,18 +930,6 @@ function goTab(tab) {
   document.getElementById('tb-title').textContent = TTLS[tab][0];
   document.getElementById('tb-sub').textContent   = TTLS[tab][1];
 }
-
-// ── UTILS ───────────────────────────────────
-function s(id, v)   { const el=document.getElementById(id); if(el) el.textContent=v||'—'; }
-function bar(id, v) { const el=document.getElementById(id); if(el) el.style.width=Math.min(v||0,100)+'%'; }
-function setPill(id, type, text) {
-  const el=document.getElementById(id); if(!el) return;
-  el.className='pill '+type; el.textContent=text;
-}
-const brl  = n => n ? 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
-const numK = n => { if(!n) return '—'; return n>=1000?(n/1000).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' mil':n.toLocaleString('pt-BR'); };
-const num  = n => n ? n.toLocaleString('pt-BR') : '—';
-const pct1 = n => n ? n.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}) : '0';
 </script>
 
 <div id="__diag" style="position:fixed;bottom:0;left:0;right:0;background:#1e293b;color:#00e5a0;font-family:monospace;font-size:10px;padding:8px;z-index:9999;max-height:120px;overflow:auto;display:none">
