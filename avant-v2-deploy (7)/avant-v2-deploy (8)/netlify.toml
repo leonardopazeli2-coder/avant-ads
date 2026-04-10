@@ -1,0 +1,17 @@
+[[redirects]]
+  from = "/"
+  to = "/admin/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin"
+  to = "/admin/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/r/:slug"
+  to = "/r/index.html"
+  status = 200
+
+[build]
+  publish = "."
