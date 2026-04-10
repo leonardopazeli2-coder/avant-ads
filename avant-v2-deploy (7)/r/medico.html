@@ -692,7 +692,7 @@ if (!D || !cli || cli.tpl !== 'medico') {
   s('vg-conv-tot', num(convTot));
   s('vg-tc-sub',   'TC Total: ' + pct1(tc_tot) + '%');
   s('vg-roas',     pct1(roas) + 'x');
-  s('vg-roi',      pct1(roi) + '%');
+  s('vg-roi',      pct1(roi / 100) + 'x');
 
   // FUNIL
   const maxF = Math.max(D.atend||0, 1);
@@ -724,7 +724,7 @@ if (!D || !cli || cli.tpl !== 'medico') {
   s('r-cir-tca',          pct1(cir_tca)+'%');
   s('r-cir-cpc',          brl(cir_cpc));
   s('r-fat-tot', brl(fatTot)); s('r-custo-tot', brl(custoTot));
-  s('r-roas', pct1(roas)+'x'); s('r-roi', pct1(roi)+'%');
+  s('r-roas', pct1(roas)+'x'); s('r-roi', pct1(roi / 100)+'x');
   s('px-inv', brl(D.invest)); s('px-inv-m', D.orcamento ? ` / Orç: ${brl(D.orcamento)}` : '');
   s('px-fat', brl(fatTot)); s('px-roas', pct1(roas)+'x'); s('px-conv', num(convTot));
   bar('pb-inv', D.orcamento>0 ? Math.min((D.invest||0)/D.orcamento*100,100) : 50);
@@ -907,7 +907,7 @@ function renderAnual(slug) {
       <td class="r purple">${num(r.cir_n)}</td>
       <td class="r green">${brl(ft)}</td>
       <td class="r blue">${pct1(rs)}x</td>
-      <td class="r ${ri>=0?'green':'red'}">${pct1(ri)}%</td>
+      <td class="r ${ri>=0?'green':'red'}">${pct1(ri/100)}x</td>
     </tr>`;
   }).join('')}</tbody></table>`;
   document.getElementById('tbl-anual').innerHTML = t;
