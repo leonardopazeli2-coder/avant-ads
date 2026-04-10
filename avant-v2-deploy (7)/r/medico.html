@@ -575,14 +575,7 @@ const slug   = params.get('slug') || window.location.pathname.split('/').filter(
 const urlData = params.get('d');
 let _urlDecoded = null;
 if (urlData) {
-  const tries = [
-    () => JSON.parse(decodeURIComponent(atob(urlData))),
-    () => JSON.parse(atob(urlData)),
-    () => JSON.parse(decodeURIComponent(decodeURIComponent(atob(urlData)))),
-  ];
-  for (const t of tries) {
-    try { _urlDecoded = t(); if (_urlDecoded) break; } catch(e) {}
-  }
+  try { _urlDecoded = JSON.parse(decodeURIComponent(atob(urlData))); } catch(e) { _urlDecoded = null; }
   if (_urlDecoded) {
     // Importa para localStorage
     Object.keys(localStorage).filter(k => k.startsWith('avant2_')).forEach(k => localStorage.removeItem(k));
@@ -593,10 +586,21 @@ if (urlData) {
 }
 
 // Lê do DB (que agora tem os dados importados da URL)
-const cli  = DB.getCliente(slug);
-let D      = DB.getUltimoRel(slug);
+let cli = DB.getCliente(slug);
+let D   = DB.getUltimoRel(slug);
 
-// FALLBACK: se DB não retornou dados, lê direto do objeto decodado
+// FALLBACK cli: extrai direto do objeto decodado se o DB não encontrou
+if (!cli && _urlDecoded) {
+  const cliKey = Object.keys(_urlDecoded).find(k => k.endsWith('clientes'));
+  if (cliKey) {
+    try {
+      const lista = JSON.parse(_urlDecoded[cliKey]);
+      cli = lista.find(c => c.slug === slug) || null;
+    } catch(e) {}
+  }
+}
+
+// FALLBACK D: extrai direto do objeto decodado se o DB não encontrou
 if ((!D || !D.invest) && _urlDecoded) {
   const relKey = Object.keys(_urlDecoded).find(k => k.includes('_rel_'));
   if (relKey) {
