@@ -170,6 +170,48 @@ td.purple{color:var(--purple);font-weight:600}
 .nf h2{font-size:22px;font-weight:800;color:var(--txt);margin-bottom:7px}
 .nf p{color:var(--txt2);font-size:13px;line-height:1.6}
 
+/* ── VISÃO GERAL REDESIGN ────────────────── */
+#sec-visao{background:#F4F6F9;padding:28px 28px 60px}
+
+.vg-sdiv{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--txt3);
+  display:flex;align-items:center;gap:10px;margin:32px 0 14px}
+.vg-sdiv:first-child{margin-top:0}
+.vg-sdiv::after{content:'';flex:1;height:1px;background:var(--b)}
+
+.vg-kpi{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);
+  padding:20px;position:relative;overflow:hidden}
+.vg-kpi-icon{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:15px}
+.vg-kpi-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;
+  color:var(--txt3);margin-bottom:10px}
+.vg-kpi-val{font-size:24px;font-weight:700;color:var(--txt);line-height:1.1;margin-bottom:6px}
+.vg-kpi-sub{font-size:11px;color:var(--txt3)}
+
+.vg-mod{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);padding:20px}
+.vg-mod-title{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;
+  color:var(--txt);margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--b)}
+.vg-mod-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.vg-mod-row{display:flex;justify-content:space-between;align-items:center;
+  padding:7px 0;border-bottom:.5px solid rgba(0,0,0,.05)}
+.vg-mod-row:last-child{border-bottom:none}
+.vg-mod-lbl{font-size:11px;color:var(--txt2)}
+.vg-mod-val{font-size:13px;font-weight:700;color:var(--txt)}
+.vg-mod-val.red{color:var(--red)}.vg-mod-val.green{color:var(--green)}.vg-mod-val.purple{color:var(--purple)}
+
+.vg-total{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);padding:20px}
+.vg-total-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;
+  color:var(--txt3);margin-bottom:10px}
+.vg-total-val{font-size:24px;font-weight:700;color:var(--green);line-height:1.1;margin-bottom:6px}
+.vg-total-sub{font-size:11px;color:var(--txt3)}
+
+#sec-visao .roi-card{border-radius:16px;padding:20px}
+#sec-visao .roi-val{font-size:36px}
+
+@media(max-width:768px){
+  #sec-visao{padding:14px 14px 60px}
+  .vg-sdiv{margin:20px 0 10px}
+}
+
 /* HAMBURGUER */
 .hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px 8px;
   border-radius:7px;font-size:20px;line-height:1;color:var(--txt);margin-right:8px}
@@ -246,44 +288,72 @@ td.purple{color:var(--purple);font-weight:600}
 
   <!-- VISÃO GERAL -->
   <div class="sec active" id="sec-visao">
-    <div class="sdiv">Investimento & Funil</div>
+    <div class="vg-sdiv">Investimento &amp; Funil</div>
     <div class="grid g4">
-      <div class="kpi blue"><div class="kpi-top"></div><div class="kpi-ico">💰</div><div class="kpi-lbl">Investimento</div><div class="kpi-val" id="vg-invest">—</div><div class="kpi-sub">Anúncios Meta</div></div>
-      <div class="kpi blue"><div class="kpi-top"></div><div class="kpi-ico">👥</div><div class="kpi-lbl">Total Atendimentos</div><div class="kpi-val" id="vg-atend">—</div><div class="kpi-sub" id="vg-cat-sub">Custo/Atend.: —</div></div>
-      <div class="kpi blue"><div class="kpi-top"></div><div class="kpi-ico">🎯</div><div class="kpi-lbl">Leads Únicos</div><div class="kpi-val" id="vg-leads">—</div><div class="kpi-sub" id="vg-cpl-sub">CPL: —</div></div>
-      <div class="kpi blue"><div class="kpi-top"></div><div class="kpi-ico">⭐</div><div class="kpi-lbl">MQL</div><div class="kpi-val" id="vg-mql">—</div><div class="kpi-sub" id="vg-cmql-sub">Custo/MQL: —</div></div>
+      <div class="vg-kpi">
+        <div class="vg-kpi-icon" style="background:#F3EFFF;color:#7C3AED">💰</div>
+        <div class="vg-kpi-lbl">Investimento</div>
+        <div class="vg-kpi-val" id="vg-invest">—</div>
+        <div class="vg-kpi-sub">Anúncios Meta</div>
+      </div>
+      <div class="vg-kpi">
+        <div class="vg-kpi-icon" style="background:#EFF6FF;color:#185FA5">👥</div>
+        <div class="vg-kpi-lbl">Total Atendimentos</div>
+        <div class="vg-kpi-val" id="vg-atend">—</div>
+        <div class="vg-kpi-sub" id="vg-cat-sub">Custo/Atend.: —</div>
+      </div>
+      <div class="vg-kpi">
+        <div class="vg-kpi-icon" style="background:#ECFDF5;color:#0d7a4e">🎯</div>
+        <div class="vg-kpi-lbl">Leads Únicos</div>
+        <div class="vg-kpi-val" id="vg-leads">—</div>
+        <div class="vg-kpi-sub" id="vg-cpl-sub">CPL: —</div>
+      </div>
+      <div class="vg-kpi">
+        <div class="vg-kpi-icon" style="background:#FFF7ED;color:#B45309">⭐</div>
+        <div class="vg-kpi-lbl">MQL</div>
+        <div class="vg-kpi-val" id="vg-mql">—</div>
+        <div class="vg-kpi-sub" id="vg-cmql-sub">Custo/MQL: —</div>
+      </div>
     </div>
 
-    <div class="sdiv">Resultados por Modalidade</div>
+    <div class="vg-sdiv">Resultados por Modalidade</div>
     <div class="grid g3">
-      <div class="seg-card conv">
-        <div class="seg-title">🔴 Convênio</div>
-        <div class="seg-row"><span class="seg-lbl">Nº Consultas</span><span class="seg-val" id="vg-conv-n">—</span></div>
-        <div class="seg-row"><span class="seg-lbl">% do Total Atendimentos</span><span class="seg-val" id="vg-conv-pct-atend">—</span></div>
-        <div class="seg-row"><span class="seg-lbl">TC / Leads</span><span class="seg-val" id="vg-conv-tc">—</span></div>
+      <div class="vg-mod">
+        <div class="vg-mod-title"><span class="vg-mod-dot" style="background:#dc2626"></span>Convênio</div>
+        <div class="vg-mod-row"><span class="vg-mod-lbl">Nº Consultas</span><span class="vg-mod-val red" id="vg-conv-n">—</span></div>
+        <div class="vg-mod-row"><span class="vg-mod-lbl">% do Total Atendimentos</span><span class="vg-mod-val red" id="vg-conv-pct-atend">—</span></div>
+        <div class="vg-mod-row"><span class="vg-mod-lbl">TC / Leads</span><span class="vg-mod-val red" id="vg-conv-tc">—</span></div>
       </div>
-      <div class="seg-card part">
-        <div class="seg-title">🟢 Particular</div>
-        <div class="seg-row"><span class="seg-lbl">Nº Consultas</span><span class="seg-val" id="vg-part-n">—</span></div>
-        <div class="seg-row"><span class="seg-lbl">% do Total Atendimentos</span><span class="seg-val" id="vg-part-pct-atend">—</span></div>
-        <div class="seg-row"><span class="seg-lbl">Faturamento</span><span class="seg-val" id="vg-part-fat">—</span></div>
-        <div class="seg-row"><span class="seg-lbl">TC / Leads</span><span class="seg-val" id="vg-part-tc">—</span></div>
-        <div class="seg-row"><span class="seg-lbl">Custo / Consulta</span><span class="seg-val" id="vg-part-cpc">—</span></div>
+      <div class="vg-mod">
+        <div class="vg-mod-title"><span class="vg-mod-dot" style="background:#16a368"></span>Particular</div>
+        <div class="vg-mod-row"><span class="vg-mod-lbl">Nº Consultas</span><span class="vg-mod-val green" id="vg-part-n">—</span></div>
+        <div class="vg-mod-row"><span class="vg-mod-lbl">% do Total Atendimentos</span><span class="vg-mod-val green" id="vg-part-pct-atend">—</span></div>
+        <div class="vg-mod-row"><span class="vg-mod-lbl">Faturamento</span><span class="vg-mod-val green" id="vg-part-fat">—</span></div>
+        <div class="vg-mod-row"><span class="vg-mod-lbl">TC / Leads</span><span class="vg-mod-val green" id="vg-part-tc">—</span></div>
+        <div class="vg-mod-row"><span class="vg-mod-lbl">Custo / Consulta</span><span class="vg-mod-val green" id="vg-part-cpc">—</span></div>
       </div>
-      <div class="seg-card cir">
-        <div class="seg-title">🟣 Cirurgias</div>
-        <div class="seg-row"><span class="seg-lbl">Nº Cirurgias</span><span class="seg-val" id="vg-cir-n">—</span></div>
-        <div class="seg-row"><span class="seg-lbl">% do Total Atendimentos</span><span class="seg-val" id="vg-cir-pct-atend">—</span></div>
-        <div class="seg-row"><span class="seg-lbl">Faturamento</span><span class="seg-val" id="vg-cir-fat">—</span></div>
-        <div class="seg-row"><span class="seg-lbl">TC / Leads</span><span class="seg-val" id="vg-cir-tc">—</span></div>
-        <div class="seg-row"><span class="seg-lbl">Custo / Cirurgia</span><span class="seg-val" id="vg-cir-cpc">—</span></div>
+      <div class="vg-mod">
+        <div class="vg-mod-title"><span class="vg-mod-dot" style="background:#7c3aed"></span>Cirurgias</div>
+        <div class="vg-mod-row"><span class="vg-mod-lbl">Nº Cirurgias</span><span class="vg-mod-val purple" id="vg-cir-n">—</span></div>
+        <div class="vg-mod-row"><span class="vg-mod-lbl">% do Total Atendimentos</span><span class="vg-mod-val purple" id="vg-cir-pct-atend">—</span></div>
+        <div class="vg-mod-row"><span class="vg-mod-lbl">Faturamento</span><span class="vg-mod-val purple" id="vg-cir-fat">—</span></div>
+        <div class="vg-mod-row"><span class="vg-mod-lbl">TC / Leads</span><span class="vg-mod-val purple" id="vg-cir-tc">—</span></div>
+        <div class="vg-mod-row"><span class="vg-mod-lbl">Custo / Cirurgia</span><span class="vg-mod-val purple" id="vg-cir-cpc">—</span></div>
       </div>
     </div>
 
-    <div class="sdiv">Totais & Retorno</div>
+    <div class="vg-sdiv">Totais &amp; Retorno</div>
     <div class="grid g4">
-      <div class="kpi green"><div class="kpi-top"></div><div class="kpi-ico">💵</div><div class="kpi-lbl">Faturamento Total</div><div class="kpi-val" id="vg-fat-tot">—</div><div class="kpi-sub">Part + Cir</div></div>
-      <div class="kpi green"><div class="kpi-top"></div><div class="kpi-ico">🏆</div><div class="kpi-lbl">Total Conversões</div><div class="kpi-val" id="vg-conv-tot">—</div><div class="kpi-sub" id="vg-tc-sub">TC: —</div></div>
+      <div class="vg-total">
+        <div class="vg-total-lbl">Faturamento Total</div>
+        <div class="vg-total-val" id="vg-fat-tot">—</div>
+        <div class="vg-total-sub">Part + Cir</div>
+      </div>
+      <div class="vg-total">
+        <div class="vg-total-lbl">Total Conversões</div>
+        <div class="vg-total-val" id="vg-conv-tot">—</div>
+        <div class="vg-total-sub" id="vg-tc-sub">TC: —</div>
+      </div>
       <div class="roi-card"><div class="roi-lbl">ROAS</div><div class="roi-val" id="vg-roas">—</div><div class="roi-sub">Retorno sobre invest.</div></div>
       <div class="roi-card" style="background:linear-gradient(135deg,#065f46,#0d7a4e)"><div class="roi-lbl">ROI</div><div class="roi-val" id="vg-roi">—</div><div class="roi-sub">Retorno sobre custo total</div></div>
     </div>
