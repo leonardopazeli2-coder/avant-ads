@@ -282,7 +282,7 @@ td.purple{color:var(--purple);font-weight:600}
 
     <div class="sdiv">Totais & Retorno</div>
     <div class="grid g4">
-      <div class="kpi green"><div class="kpi-top"></div><div class="kpi-ico">💵</div><div class="kpi-lbl">Faturamento Total</div><div class="kpi-val" id="vg-fat-tot">—</div><div class="kpi-sub">Conv + Part + Cir</div></div>
+      <div class="kpi green"><div class="kpi-top"></div><div class="kpi-ico">💵</div><div class="kpi-lbl">Faturamento Total</div><div class="kpi-val" id="vg-fat-tot">—</div><div class="kpi-sub">Part + Cir</div></div>
       <div class="kpi green"><div class="kpi-top"></div><div class="kpi-ico">🏆</div><div class="kpi-lbl">Total Conversões</div><div class="kpi-val" id="vg-conv-tot">—</div><div class="kpi-sub" id="vg-tc-sub">TC: —</div></div>
       <div class="roi-card"><div class="roi-lbl">ROAS</div><div class="roi-val" id="vg-roas">—</div><div class="roi-sub">Retorno sobre invest.</div></div>
       <div class="roi-card" style="background:linear-gradient(135deg,#065f46,#0d7a4e)"><div class="roi-lbl">ROI</div><div class="roi-val" id="vg-roi">—</div><div class="roi-sub">Retorno sobre custo total</div></div>
@@ -380,7 +380,7 @@ td.purple{color:var(--purple);font-weight:600}
       </div>
 
       <div style="display:flex;flex-direction:column;gap:11px">
-        <div class="kpi green"><div class="kpi-top"></div><div class="kpi-lbl">Faturamento Total</div><div class="kpi-val" id="r-fat-tot">—</div><div class="kpi-sub">Conv + Part + Cirurgias</div></div>
+        <div class="kpi green"><div class="kpi-top"></div><div class="kpi-lbl">Faturamento Total</div><div class="kpi-val" id="r-fat-tot">—</div><div class="kpi-sub">Part + Cirurgias</div></div>
         <div class="kpi blue"><div class="kpi-top"></div><div class="kpi-lbl">Custo Total Marketing</div><div class="kpi-val" id="r-custo-tot">—</div><div class="kpi-sub" id="r-custo-sub">Anúncios + Agência + CRM + Outros</div></div>
         <div class="roi-card"><div class="roi-lbl">ROAS</div><div class="roi-val" id="r-roas">—</div><div class="roi-sub">Fat. Total / Invest. Anúncios</div></div>
         <div class="roi-card" style="background:linear-gradient(135deg,#065f46,#0d7a4e)"><div class="roi-lbl">ROI</div><div class="roi-val" id="r-roi">—</div><div class="roi-sub">(Fat. - Custo Total) / Custo Total</div></div>
@@ -674,7 +674,7 @@ if (!D || !cli || cli.tpl !== 'medico') {
   };
 
   // Calcular derivados
-  const convTot = (D.conv_n||0) + (D.part_n||0) + (D.cir_n||0);
+  const convTot = (D.part_n||0) + (D.cir_n||0);
   const fatTot  = (D.part_fat||0) + (D.cir_fat||0); // convênio não tem faturamento neste relatório
   const custoTot= (D.invest||0) + (D.custo_agencia||0) + (D.custo_crm||0) + (D.custo_outros||0);
   const roas    = D.invest > 0 ? fatTot / D.invest : 0;
@@ -879,9 +879,9 @@ function renderAnual(slug) {
   const rels   = meses.map(m => DB.getRel(slug, m) || {});
 
   const vals = key => rels.map(r => r[key]||0);
-  const fatArr  = rels.map(r => (r.conv_fat||0)+(r.part_fat||0)+(r.cir_fat||0));
+  const fatArr  = rels.map(r => (r.part_fat||0)+(r.cir_fat||0));
   const roasArr = rels.map(r => {
-    const ft = (r.conv_fat||0)+(r.part_fat||0)+(r.cir_fat||0);
+    const ft = (r.part_fat||0)+(r.cir_fat||0);
     return r.invest > 0 ? ft/r.invest : 0;
   });
 
@@ -929,7 +929,7 @@ function renderAnual(slug) {
     <th class="r">Conv.</th><th class="r">Part.</th><th class="r">Cir.</th>
     <th class="r">Fat. Total</th><th class="r">ROAS</th><th class="r">ROI</th>
   </tr></thead><tbody>${rels.map((r,i) => {
-    const ft = (r.conv_fat||0)+(r.part_fat||0)+(r.cir_fat||0);
+    const ft = (r.part_fat||0)+(r.cir_fat||0);
     const ct = (r.invest||0)+(r.custo_agencia||0)+(r.custo_crm||0)+(r.custo_outros||0);
     const rs = r.invest > 0 ? ft/r.invest : 0;
     const ri = ct > 0 ? (ft-ct)/ct*100 : 0;
