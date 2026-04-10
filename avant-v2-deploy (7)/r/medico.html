@@ -169,6 +169,40 @@ td.purple{color:var(--purple);font-weight:600}
 .nf .ni2{font-size:60px;margin-bottom:18px}
 .nf h2{font-size:22px;font-weight:800;color:var(--txt);margin-bottom:7px}
 .nf p{color:var(--txt2);font-size:13px;line-height:1.6}
+
+/* HAMBURGUER */
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px 8px;
+  border-radius:7px;font-size:20px;line-height:1;color:var(--txt);margin-right:8px}
+.hamburger:hover{background:var(--bg)}
+
+/* OVERLAY */
+#sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99}
+#sb-overlay.open{display:block}
+
+/* MOBILE */
+@media(max-width:768px){
+  body{display:block}
+  aside{
+    position:fixed;top:0;left:0;height:100vh;z-index:100;
+    transform:translateX(-100%);transition:transform .25s cubic-bezier(.4,0,.2,1);
+    width:240px;min-height:unset
+  }
+  aside.open{transform:translateX(0)}
+  main{width:100%;overflow-y:unset}
+  .topbar{padding:12px 16px}
+  .hamburger{display:inline-flex;align-items:center;justify-content:center}
+  .sec{padding:14px 14px 60px}
+  .g4{grid-template-columns:repeat(2,1fr)!important}
+  .g3{grid-template-columns:repeat(2,1fr)}
+  .kpi{padding:13px 12px}
+  .kpi-val{font-size:18px}
+  .kpi-ico{font-size:14px;top:13px;right:10px}
+  .roi-val{font-size:24px}
+  .seg-card{padding:13px 12px}
+  .funnel,.pvx,.chart-card,.tbl-card,.camp-card{padding:14px 12px}
+  .grid.g2{grid-template-columns:1fr}
+  .sdiv{margin:14px 0 10px}
+}
 </style>
 </head>
 <body>
@@ -192,9 +226,11 @@ td.purple{color:var(--purple);font-weight:600}
   </div>
   <div class="sb-foot">Relatório por <strong>Avant Ads</strong></div>
 </aside>
+<div id="sb-overlay" onclick="closeSidebar()"></div>
 
 <main>
   <div class="topbar">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">☰</button>
     <div class="tb-left">
       <h1 id="tb-title">Visão Geral</h1>
       <p id="tb-sub">Performance consolidada do período</p>
@@ -929,6 +965,17 @@ function goTab(tab) {
   document.getElementById('sec-'+tab).classList.add('active');
   document.getElementById('tb-title').textContent = TTLS[tab][0];
   document.getElementById('tb-sub').textContent   = TTLS[tab][1];
+  closeSidebar();
+}
+function toggleSidebar() {
+  const aside   = document.querySelector('aside');
+  const overlay = document.getElementById('sb-overlay');
+  const open    = aside.classList.toggle('open');
+  overlay.classList.toggle('open', open);
+}
+function closeSidebar() {
+  document.querySelector('aside').classList.remove('open');
+  document.getElementById('sb-overlay').classList.remove('open');
 }
 </script>
 
@@ -939,6 +986,7 @@ function goTab(tab) {
 (function(){
   try {
     const p = new URLSearchParams(window.location.search);
+    if(p.get('debug') !== 'true') return;
     const d = p.get('d');
     const el = document.getElementById('__diag');
     const tx = document.getElementById('__diag-txt');
