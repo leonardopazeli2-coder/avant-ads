@@ -33,10 +33,19 @@ const DB = {
     const cli = this.getCliente(slug) || {};
     this.upsertCliente({ ...cli, slug, ultimoMes: mes });
   },
+  _mesKey(mesAno) {
+    const ORDEM = ['janeiro','fevereiro','marco','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    const parts  = mesAno.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').split(/[\/\s\-_]+/);
+    const nome   = parts[0];
+    const ano    = parts[1] || '0000';
+    const idx    = ORDEM.indexOf(nome);
+    return ano + '_' + String(idx < 0 ? 99 : idx).padStart(2,'0');
+  },
   getMeses(slug) {
     const pfx = this.PFX + 'rel_' + slug + '_';
     return Object.keys(localStorage).filter(k => k.startsWith(pfx))
-      .map(k => k.replace(pfx, '').replace('_', '/').trim()).sort();
+      .map(k => k.replace(pfx, '').replace('_', '/').trim())
+      .sort((a, b) => this._mesKey(a).localeCompare(this._mesKey(b)));
   },
   getUltimoRel(slug) {
     const meses = this.getMeses(slug);
