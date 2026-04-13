@@ -473,6 +473,7 @@ td.purple{color:var(--purple);font-weight:600}
       </div>
 
       <div class="grid" style="grid-template-columns:1fr;gap:11px;align-content:start">
+        <div class="kpi green"><div class="kpi-top"></div><div class="kpi-lbl">Taxa de Conversão de Atendimentos</div><div class="kpi-val" id="fn-tc-atend">—</div><div class="kpi-sub">Particular + Cirurgia / Total Atendimentos</div></div>
         <div class="kpi blue"><div class="kpi-top"></div><div class="kpi-lbl">Custo / Atendimento</div><div class="kpi-val" id="fn-cat">—</div><div class="kpi-sub">Investimento / Atendimentos</div></div>
         <div class="kpi blue"><div class="kpi-top"></div><div class="kpi-lbl">Custo / Lead</div><div class="kpi-val" id="fn-cpl">—</div><div class="kpi-sub">Investimento / Leads</div></div>
         <div class="kpi purple"><div class="kpi-top"></div><div class="kpi-lbl">Custo / MQL</div><div class="kpi-val" id="fn-cmql">—</div><div class="kpi-sub">Investimento / MQL</div></div>
@@ -982,6 +983,7 @@ function renderMes(mes) {
   s('fm-mql',   `Custo/MQL: ${brl(cmql)} · ${pct1(mql_pct)}% dos leads`);
   s('fm-conv',  `TC Total/Leads: ${pct1(tc_tot)}% · Custo/Conv.: ${brl(cconv)}`);
   s('fn-cat',   brl(cat)); s('fn-cpl', brl(cpl)); s('fn-cmql', brl(cmql)); s('fn-cconv', brl(cconv));
+  s('fn-tc-atend', pct1(part_tca + cir_tca)+'%');
 
   // RESULTADOS
   s('r-conv-n',           num(D.conv_n));
