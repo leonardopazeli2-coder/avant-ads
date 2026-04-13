@@ -361,7 +361,6 @@ td.purple{color:var(--purple);font-weight:600}
     <div class="ni" onclick="goTab('resultado')"><span class="ic">◉</span>Resultados</div>
     <div class="ni" onclick="goTab('anual')"><span class="ic">📈</span>Histórico Anual</div>
     <div class="ni" onclick="goTab('perfil')"><span class="ic">◧</span>Perfil & Conteúdo</div>
-    <div class="ni" onclick="goTab('estrutura')"><span class="ic">⬢</span>Campanha</div>
   </div>
   <div class="sb-foot">Relatório por <strong>Avant Ads</strong></div>
 </aside>
@@ -821,38 +820,6 @@ td.purple{color:var(--purple);font-weight:600}
   </div>
 
   <!-- ESTRUTURA -->
-  <div class="sec" id="sec-estrutura">
-    <div class="sdiv">Campanha Ativa</div>
-    <div class="camp-card">
-      <div class="camp-hd">
-        <div class="camp-status"></div>
-        <div><div class="camp-name" id="est-nome">—</div><div class="camp-obj" id="est-obj">—</div></div>
-        <span class="camp-badge">ATIVA</span>
-      </div>
-      <div class="det-grid">
-        <div><div class="det-lbl">Orçamento</div><div class="det-val" id="est-orc">—</div></div>
-        <div><div class="det-lbl">Período</div><div class="det-val" id="est-per">—</div></div>
-        <div><div class="det-lbl">Plataforma</div><div class="det-val">Meta Ads</div></div>
-        <div><div class="det-lbl">Status</div><div class="det-val" style="color:var(--green)">Ativa</div></div>
-      </div>
-      <div style="font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px">Conjunto de Anúncios</div>
-      <div class="conj-row">
-        <div class="conj-name" id="est-conj">Público-alvo principal</div>
-        <div class="tag-wrap">
-          <span class="tag blue">📍 <span id="est-loc">—</span></span>
-          <span class="tag amber">👥 <span id="est-idade">—</span></span>
-          <span class="tag green">🎯 <span id="est-int">—</span></span>
-        </div>
-      </div>
-    </div>
-    <div class="sdiv">Custos Fixos de Marketing</div>
-    <div class="grid g4">
-      <div class="kpi blue"><div class="kpi-top"></div><div class="kpi-lbl">Agência</div><div class="kpi-val" id="est-ag">—</div><div class="kpi-sub">Honorário mensal</div></div>
-      <div class="kpi blue"><div class="kpi-top"></div><div class="kpi-lbl">CRM</div><div class="kpi-val" id="est-crm">—</div><div class="kpi-sub">Plataforma CRM</div></div>
-      <div class="kpi blue"><div class="kpi-top"></div><div class="kpi-lbl">Outros</div><div class="kpi-val" id="est-out">—</div><div class="kpi-sub">Demais custos</div></div>
-      <div class="kpi amber"><div class="kpi-top"></div><div class="kpi-lbl">Custo Total Mkt</div><div class="kpi-val" id="est-tot">—</div><div class="kpi-sub">Anúncios + todos</div></div>
-    </div>
-  </div>
 </main>
 
 <script src="../assets/db.js"></script>
@@ -1341,14 +1308,13 @@ function renderAnual(slug) {
 }
 
 // ── NAV ─────────────────────────────────────
-const TABS = ['visao','funil','resultado','anual','perfil','estrutura'];
+const TABS = ['visao','funil','resultado','anual','perfil'];
 const TTLS = {
   visao:     ['Visão Geral','Performance consolidada do período'],
   funil:     ['Funil de Leads','Jornada do paciente'],
   resultado: ['Resultados','Convênio · Particular · Cirurgias'],
   anual:     ['Histórico Anual','Evolução mensal do ano'],
   perfil:    ['Perfil & Conteúdo','Visão geral do perfil Instagram'],
-  estrutura: ['Campanha','Configuração e custos'],
 };
 function goTab(tab) {
   document.querySelectorAll('.ni').forEach((n,i) => n.classList.toggle('active', TABS[i]===tab));
