@@ -156,9 +156,83 @@ main{flex:1;overflow-y:auto}
 .empty .ei{font-size:44px;margin-bottom:13px}
 .empty h3{font-size:15px;font-weight:700;color:var(--txt2);margin-bottom:5px}
 .empty p{font-size:12px;line-height:1.6}
+
+/* ── LOGIN / SETUP ─────────────────────── */
+#auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#0C447C 0%,#185FA5 100%);
+  z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
+.auth-box{background:#fff;border-radius:20px;padding:36px 36px 32px;width:100%;max-width:400px;
+  box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.auth-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px}
+.auth-logo-dot{width:36px;height:36px;border-radius:9px;background:#0C447C;
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff}
+.auth-logo-name{font-size:20px;font-weight:800;color:#1e293b}
+.auth-sub{font-size:12px;color:#94a3b8;text-align:center;margin-bottom:26px}
+.auth-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;
+  color:#475569;margin-bottom:6px}
+.auth-sel,.auth-inp{width:100%;padding:10px 13px;border-radius:9px;border:1.5px solid #e2e8f0;
+  font-family:var(--H);font-size:13px;margin-bottom:14px;outline:none;
+  background:#f8fafc;color:#1e293b;transition:border-color .15s}
+.auth-sel:focus,.auth-inp:focus{border-color:#185FA5;background:#fff}
+.auth-btn{width:100%;padding:13px;border-radius:10px;background:#185FA5;color:#fff;
+  font-family:var(--H);font-size:14px;font-weight:700;border:none;cursor:pointer;
+  transition:opacity .15s;margin-top:4px}
+.auth-btn:hover{opacity:.88}
+.auth-err{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;
+  padding:10px 13px;font-size:12px;color:#dc2626;margin-bottom:14px;display:none}
+.auth-note{font-size:11px;color:#94a3b8;text-align:center;margin-top:16px;line-height:1.6}
+.auth-section-title{font-size:13px;font-weight:700;color:#1e293b;
+  margin:18px 0 14px;padding-top:14px;border-top:1px solid #e2e8f0}
+.pwd-logout{display:block;margin-top:8px;background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.55);
+  border-radius:6px;padding:5px 10px;font-size:10px;cursor:pointer;
+  font-family:var(--H);width:100%;text-align:left;transition:all .15s}
+.pwd-logout:hover{background:rgba(255,255,255,.18);color:#fff}
 </style>
 </head>
 <body>
+
+<!-- TELA DE LOGIN / SETUP -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="auth-logo-dot">A</div>
+      <div class="auth-logo-name">Avant Ads</div>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="auth-login">
+      <p class="auth-sub">Painel Administrativo</p>
+      <div class="auth-lbl">Usuário</div>
+      <select class="auth-sel" id="auth-user">
+        <option value="admin">Administrador</option>
+        <option value="colab">Colaborador</option>
+      </select>
+      <div class="auth-lbl">Senha</div>
+      <input class="auth-inp" type="password" id="auth-pass" placeholder="Digite sua senha"
+        onkeydown="if(event.key==='Enter')doLogin()">
+      <div class="auth-err" id="auth-err">Senha incorreta. Tente novamente.</div>
+      <button class="auth-btn" onclick="doLogin()">Entrar</button>
+    </div>
+
+    <!-- SETUP (primeiro acesso) -->
+    <div id="auth-setup" style="display:none">
+      <p class="auth-sub">Configure as senhas de acesso — apenas neste primeiro uso</p>
+      <div class="auth-section-title">👤 Administrador</div>
+      <div class="auth-lbl">Senha</div>
+      <input class="auth-inp" type="password" id="setup-admin" placeholder="Mínimo 6 caracteres">
+      <div class="auth-lbl">Confirmar senha</div>
+      <input class="auth-inp" type="password" id="setup-admin2" placeholder="Repita a senha">
+      <div class="auth-section-title">👥 Colaborador</div>
+      <div class="auth-lbl">Senha</div>
+      <input class="auth-inp" type="password" id="setup-colab" placeholder="Mínimo 6 caracteres">
+      <div class="auth-lbl">Confirmar senha</div>
+      <input class="auth-inp" type="password" id="setup-colab2" placeholder="Repita a senha">
+      <div class="auth-err" id="setup-err">As senhas não coincidem.</div>
+      <button class="auth-btn" onclick="doSetup()">Salvar e entrar</button>
+      <p class="auth-note">Este setup é exibido apenas uma vez.<br>Você pode alterar as senhas em Configurações.</p>
+    </div>
+  </div>
+</div>
 
 <aside>
   <div class="sb-logo">
@@ -179,7 +253,10 @@ main{flex:1;overflow-y:auto}
     <div class="sc-lbl">Clientes</div>
     <div id="sb-cli-items"></div>
   </div>
-  <div class="sb-foot">Avant Ads &copy; <strong id="sb-yr"></strong></div>
+  <div class="sb-foot">
+    Avant Ads &copy; <strong id="sb-yr"></strong> · <span id="sb-user-lbl"></span>
+    <button class="pwd-logout" onclick="authLogout()">⎋ Sair da conta</button>
+  </div>
 </aside>
 
 <main>
@@ -255,6 +332,37 @@ main{flex:1;overflow-y:auto}
           <button class="btn btn-acc btn-sm" onclick="doExport()">⬇ Baixar backup</button>
           <input type="file" id="imp-file" accept=".json" style="display:none" onchange="doImport(event)">
           <button class="btn btn-g btn-sm" onclick="document.getElementById('imp-file').click()">⬆ Importar</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="card-hd"><div><h3>🔑 Senhas de acesso</h3><p>Altere as senhas dos usuários</p></div></div>
+      <div class="grid g2" style="margin-top:4px">
+        <div>
+          <p style="font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:10px">👤 Administrador</p>
+          <div class="ff" style="margin-bottom:8px">
+            <label>Nova senha</label>
+            <input type="password" id="pwd-admin-new" placeholder="Mínimo 6 caracteres">
+          </div>
+          <div class="ff" style="margin-bottom:10px">
+            <label>Confirmar nova senha</label>
+            <input type="password" id="pwd-admin-new2" placeholder="Repita a senha">
+          </div>
+          <div class="auth-err" id="pwd-admin-err"></div>
+          <button class="btn btn-acc btn-sm" onclick="changePwd('admin')">Alterar senha</button>
+        </div>
+        <div>
+          <p style="font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:10px">👥 Colaborador</p>
+          <div class="ff" style="margin-bottom:8px">
+            <label>Nova senha</label>
+            <input type="password" id="pwd-colab-new" placeholder="Mínimo 6 caracteres">
+          </div>
+          <div class="ff" style="margin-bottom:10px">
+            <label>Confirmar nova senha</label>
+            <input type="password" id="pwd-colab-new2" placeholder="Repita a senha">
+          </div>
+          <div class="auth-err" id="pwd-colab-err"></div>
+          <button class="btn btn-acc btn-sm" onclick="changePwd('colab')">Alterar senha</button>
         </div>
       </div>
     </div>
@@ -713,6 +821,97 @@ function toast(msg) {
   clearTimeout(_tt); _tt = setTimeout(()=>el.classList.remove('show'), 2800);
 }
 
+// ── AUTH ────────────────────────────────────
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function authCheck() {
+  const user = sessionStorage.getItem('avant2_auth');
+  if (user) {
+    document.getElementById('auth-screen').style.display = 'none';
+    const labels = { admin: 'Admin', colab: 'Colaborador' };
+    const lbl = document.getElementById('sb-user-lbl');
+    if (lbl) lbl.textContent = labels[user] || user;
+    return;
+  }
+  const needsSetup = !localStorage.getItem('avant2_pwd_admin');
+  if (needsSetup) {
+    document.getElementById('auth-login').style.display = 'none';
+    document.getElementById('auth-setup').style.display = 'block';
+  }
+  // auth-screen stays visible
+}
+
+async function doLogin() {
+  const user  = document.getElementById('auth-user').value;
+  const pass  = document.getElementById('auth-pass').value;
+  const errEl = document.getElementById('auth-err');
+  if (!pass) { errEl.textContent='Digite a senha.'; errEl.style.display='block'; return; }
+  const hash   = await sha256(pass);
+  const stored = localStorage.getItem('avant2_pwd_' + user);
+  if (stored && stored === hash) {
+    sessionStorage.setItem('avant2_auth', user);
+    document.getElementById('auth-screen').style.display = 'none';
+    const labels = { admin: 'Admin', colab: 'Colaborador' };
+    const lbl = document.getElementById('sb-user-lbl');
+    if (lbl) lbl.textContent = labels[user] || user;
+    errEl.style.display = 'none';
+  } else {
+    errEl.textContent = 'Senha incorreta. Tente novamente.';
+    errEl.style.display = 'block';
+    document.getElementById('auth-pass').value = '';
+  }
+}
+
+async function doSetup() {
+  const adminP  = document.getElementById('setup-admin').value;
+  const adminP2 = document.getElementById('setup-admin2').value;
+  const colabP  = document.getElementById('setup-colab').value;
+  const colabP2 = document.getElementById('setup-colab2').value;
+  const errEl   = document.getElementById('setup-err');
+  if (adminP.length < 6 || colabP.length < 6) {
+    errEl.textContent='As senhas precisam ter ao menos 6 caracteres.'; errEl.style.display='block'; return;
+  }
+  if (adminP !== adminP2) {
+    errEl.textContent='As senhas do Administrador não coincidem.'; errEl.style.display='block'; return;
+  }
+  if (colabP !== colabP2) {
+    errEl.textContent='As senhas do Colaborador não coincidem.'; errEl.style.display='block'; return;
+  }
+  const [adminH, colabH] = await Promise.all([sha256(adminP), sha256(colabP)]);
+  localStorage.setItem('avant2_pwd_admin', adminH);
+  localStorage.setItem('avant2_pwd_colab', colabH);
+  sessionStorage.setItem('avant2_auth', 'admin');
+  document.getElementById('auth-screen').style.display = 'none';
+  const lbl = document.getElementById('sb-user-lbl');
+  if (lbl) lbl.textContent = 'Admin';
+}
+
+function authLogout() {
+  sessionStorage.removeItem('avant2_auth');
+  location.reload();
+}
+
+async function changePwd(role) {
+  const newP  = document.getElementById('pwd-' + role + '-new').value;
+  const newP2 = document.getElementById('pwd-' + role + '-new2').value;
+  const errEl = document.getElementById('pwd-' + role + '-err');
+  if (newP.length < 6) {
+    errEl.textContent='Mínimo 6 caracteres.'; errEl.style.display='block'; return;
+  }
+  if (newP !== newP2) {
+    errEl.textContent='As senhas não coincidem.'; errEl.style.display='block'; return;
+  }
+  localStorage.setItem('avant2_pwd_' + role, await sha256(newP));
+  errEl.style.display = 'none';
+  document.getElementById('pwd-' + role + '-new').value = '';
+  document.getElementById('pwd-' + role + '-new2').value = '';
+  toast('✓ Senha alterada!');
+}
+
+authCheck();
 renderDash();
 </script>
 </body>
