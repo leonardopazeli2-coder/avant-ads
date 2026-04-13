@@ -597,8 +597,8 @@ function openNewMes() {
   renderMTabs(curCli, DB.getMeses(curCli));
   toast(`Mês "${curMes}" criado!`);
 }
-function showLink() { if (curCli) showLinkSlug(curCli); }
-function showLinkSlug(slug) {
+function showLink() { if (curCli) showLinkSlug(curCli, curMes); }
+function showLinkSlug(slug, mes) {
   const base = DB.getConfig('url') || window.location.origin;
   const cli  = DB.getCliente(slug);
   const tpl  = cli?.tpl || 'medico';
@@ -617,9 +617,10 @@ function showLinkSlug(slug) {
 
     // Encode UTF-8 seguro: JSON → encodeURIComponent → base64
     const jsonStr = JSON.stringify(allData);
-    const b64 = btoa(encodeURIComponent(jsonStr));
+    const b64  = btoa(encodeURIComponent(jsonStr));
     const page = tpl === 'medico' ? 'medico.html' : 'geral.html';
-    const url  = `${base}/r/${page}?slug=${slug}&d=${b64}`;
+    const mesPart = mes ? `&mes=${encodeURIComponent(mes)}` : '';
+    const url  = `${base}/r/${page}?slug=${slug}&d=${b64}${mesPart}`;
     document.getElementById('link-val').value = url;
   } catch(e) {
     document.getElementById('link-val').value = `${base}/r/${slug}`;
@@ -761,7 +762,7 @@ function renderForm(slug, mes) {
       </div>
       ${html}
       <div style="display:flex;justify-content:flex-end;gap:7px;padding-top:14px;border-top:1px solid var(--b)">
-        <button class="btn btn-g" onclick="showLinkSlug('${slug}')">🔗 Ver link</button>
+        <button class="btn btn-g" onclick="showLinkSlug('${slug}', '${mes}')">🔗 Ver link</button>
         <button class="btn btn-acc" onclick="saveRel('${slug}','${mes}')">✓ Salvar relatório</button>
       </div>
     </div>`;

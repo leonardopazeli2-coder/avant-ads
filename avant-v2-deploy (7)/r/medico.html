@@ -812,7 +812,8 @@ if (urlData) {
 
 // Lê do DB (que agora tem os dados importados da URL)
 let cli = DB.getCliente(slug);
-let D   = DB.getUltimoRel(slug);
+const mesParam = params.get('mes');
+let D   = (mesParam ? DB.getRel(slug, mesParam) : null) || DB.getUltimoRel(slug);
 
 // FALLBACK cli: extrai direto do objeto decodado se o DB não encontrou
 if (!cli && _urlDecoded) {
