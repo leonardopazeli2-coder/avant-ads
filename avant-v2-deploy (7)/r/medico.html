@@ -271,6 +271,19 @@ td.purple{color:var(--purple);font-weight:600}
   .pf-bk-outer{grid-template-columns:1fr}
 }
 
+/* SELETOR DE MESES (sidebar) */
+.sb-month-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;
+  color:rgba(255,255,255,.4);padding:10px 14px 5px;border-top:1px solid rgba(255,255,255,.08)}
+.sb-month-list{padding:2px 8px 10px;max-height:220px;overflow-y:auto}
+.sb-month-list::-webkit-scrollbar{width:3px}
+.sb-month-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:2px}
+.sb-month-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;
+  font-size:11px;font-weight:500;color:rgba(255,255,255,.55);cursor:pointer;
+  transition:all .15s;margin-bottom:1px;border:1px solid transparent;user-select:none}
+.sb-month-item:hover{background:rgba(255,255,255,.08);color:#fff}
+.sb-month-item.active{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.15);color:#fff}
+.sb-month-dot{width:6px;height:6px;border-radius:50%;background:#85B7EB;flex-shrink:0}
+
 /* ANUAL — badges de variação */
 .tbl-badge{display:inline-block;font-size:10px;border-radius:4px;padding:1px 5px;margin-top:2px;font-weight:600;white-space:nowrap}
 .tbl-badge.up{background:#e8f7f1;color:#0d7a4e}
@@ -326,6 +339,11 @@ td.purple{color:var(--purple);font-weight:600}
     <div class="sb-cli" id="sb-cli">—</div>
     <div class="sb-period" id="sb-period">—</div>
   </div>
+  <div id="sb-month-wrap" style="display:none">
+    <div class="sb-month-lbl">Período</div>
+    <div id="sb-months" class="sb-month-list"></div>
+  </div>
+
   <div class="sb-nav">
     <div class="ni active" onclick="goTab('visao')"><span class="ic">◈</span>Visão Geral</div>
     <div class="ni" onclick="goTab('funil')"><span class="ic">⬡</span>Funil de Leads</div>
@@ -830,10 +848,8 @@ if (urlData) {
   }
 }
 
-// Lê do DB (que agora tem os dados importados da URL)
+// Lê do DB (dados já importados da URL)
 let cli = DB.getCliente(slug);
-const mesParam = params.get('mes');
-let D   = (mesParam ? DB.getRel(slug, mesParam) : null) || DB.getUltimoRel(slug);
 
 // FALLBACK cli: extrai direto do objeto decodado se o DB não encontrou
 if (!cli && _urlDecoded) {
@@ -846,21 +862,49 @@ if (!cli && _urlDecoded) {
   }
 }
 
-// FALLBACK D: extrai direto do objeto decodado se o DB não encontrou
-if ((!D || !D.invest) && _urlDecoded) {
-  const relKey = Object.keys(_urlDecoded).find(k => k.includes('_rel_'));
-  if (relKey) {
-    try { D = JSON.parse(_urlDecoded[relKey]); } catch(e) {}
-  }
-}
+const allMeses = DB.getMeses(slug);
 
-if (!D || !cli || cli.tpl !== 'medico') {
+if (!cli || !allMeses.length || cli.tpl !== 'medico') {
   document.querySelectorAll('aside,.topbar,.sec').forEach(e => e.style.display='none');
   document.getElementById('nf').style.display='flex';
 } else {
+  // Popula seletor de meses no sidebar (mais recente no topo)
+  s('sb-cli', cli.nome + (cli.seg ? ` — ${cli.seg}` : ''));
+  const sbWrap   = document.getElementById('sb-month-wrap');
+  const sbMonths = document.getElementById('sb-months');
+  if (sbWrap) sbWrap.style.display = 'block';
+  allMeses.slice().reverse().forEach(m => {
+    const el = document.createElement('div');
+    el.className = 'sb-month-item';
+    el.dataset.mes = m;
+    el.innerHTML = `<span class="sb-month-dot"></span>${m}`;
+    el.onclick = () => selectMes(m);
+    sbMonths.appendChild(el);
+  });
+  const mesInitParam = params.get('mes');
+  const initMes = (mesInitParam && allMeses.includes(mesInitParam)) ? mesInitParam : allMeses[allMeses.length - 1];
+  selectMes(initMes);
+  setTimeout(() => renderAnual(slug), 150);
+}
+
+function selectMes(mes) {
+  document.querySelectorAll('.sb-month-item').forEach(el =>
+    el.classList.toggle('active', el.dataset.mes === mes));
+  closeSidebar();
+  renderMes(mes);
+}
+
+function renderMes(mes) {
+  let D = DB.getRel(slug, mes);
+  if (!D && _urlDecoded) {
+    const relKey = Object.keys(_urlDecoded).find(k => k.includes('_rel_'));
+    if (relKey) { try { D = JSON.parse(_urlDecoded[relKey]); } catch(e) {} }
+  }
+  if (!D) return;
+
   // Busca mês anterior para variações automáticas
   const todosMeses = DB.getMeses(slug);
-  const idxAtual   = todosMeses.indexOf(D.mesAno);
+  const idxAtual   = todosMeses.indexOf(mes);
   const Dant       = idxAtual > 0 ? DB.getRel(slug, todosMeses[idxAtual - 1]) : null;
   const mesAntNome = Dant ? Dant.mesAno : null;
 
@@ -978,7 +1022,7 @@ if (!D || !cli || cli.tpl !== 'medico') {
 
   // PERFIL — Instagram + Facebook + Total, variações automáticas
   const mesesPf  = DB.getMeses(slug);
-  const iAtualPf = mesesPf.indexOf(D.mesAno);
+  const iAtualPf = mesesPf.indexOf(mes);
   const Dprev    = iAtualPf > 0 ? DB.getRel(slug, mesesPf[iAtualPf - 1]) : null;
   const mesAntLbl= Dprev ? `vs ${Dprev.mesAno}` : null;
 
@@ -1085,8 +1129,6 @@ if (!D || !cli || cli.tpl !== 'medico') {
   setW('bar-ig-alc-org', igAlcOrgP); setW('bar-ig-alc-ads', igAlcAdsP);
   setW('bar-fb-alc-org', fbAlcOrgP); setW('bar-fb-alc-ads', fbAlcAdsP);
 
-  // HISTÓRICO ANUAL
-  setTimeout(() => renderAnual(slug), 100);
 }
 
 // ── ANUAL ────────────────────────────────────
