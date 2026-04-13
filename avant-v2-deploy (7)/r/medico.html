@@ -954,16 +954,16 @@ function renderMes(mes) {
   const cir_pct_atend  = D.atend > 0 ? (D.cir_n||0)  / D.atend * 100 : 0;
 
   s('vg-conv-n',          num(D.conv_n));
-  s('vg-conv-pct-atend',  pct1(conv_pct_atend)+'% dos atendimentos');
+  s('vg-conv-pct-atend',  pct1(conv_pct_atend)+'%');
   s('vg-conv-tc',         pct1(conv_tc)+'%');
 
   s('vg-part-n',          num(D.part_n));
-  s('vg-part-pct-atend',  pct1(part_pct_atend)+'% dos atendimentos');
+  s('vg-part-pct-atend',  pct1(part_pct_atend)+'%');
   s('vg-part-fat',        brl(D.part_fat));
   s('vg-part-tc',         pct1(part_tc)+'%'); s('vg-part-cpc', brl(part_cpc));
 
   s('vg-cir-n',           num(D.cir_n));
-  s('vg-cir-pct-atend',   pct1(cir_pct_atend)+'% dos atendimentos');
+  s('vg-cir-pct-atend',   pct1(cir_pct_atend)+'%');
   s('vg-cir-fat',         brl(D.cir_fat));
   s('vg-cir-tc',          pct1(cir_tc)+'%'); s('vg-cir-cpc', brl(cir_cpc));
   s('vg-fat-tot',  brl(fatTot));
@@ -985,18 +985,18 @@ function renderMes(mes) {
 
   // RESULTADOS
   s('r-conv-n',           num(D.conv_n));
-  s('r-conv-pct-atend',   pct1(conv_pct_atend)+'% dos atendimentos');
+  s('r-conv-pct-atend',   pct1(conv_pct_atend)+'%');
   s('r-conv-tcl',         pct1(conv_tc)+'%');
 
   s('r-part-n',           num(D.part_n));
-  s('r-part-pct-atend',   pct1(part_pct_atend)+'% dos atendimentos');
+  s('r-part-pct-atend',   pct1(part_pct_atend)+'%');
   s('r-part-fat',         brl(D.part_fat));
   s('r-part-tcl',         pct1(part_tc)+'%');
   s('r-part-tca',         pct1(part_tca)+'%');
   s('r-part-cpc',         brl(part_cpc));
 
   s('r-cir-n',            num(D.cir_n));
-  s('r-cir-pct-atend',    pct1(cir_pct_atend)+'% dos atendimentos');
+  s('r-cir-pct-atend',    pct1(cir_pct_atend)+'%');
   s('r-cir-fat',          brl(D.cir_fat));
   s('r-cir-tcl',          pct1(cir_tc)+'%');
   s('r-cir-tca',          pct1(cir_tca)+'%');
