@@ -271,6 +271,15 @@ td.purple{color:var(--purple);font-weight:600}
   .pf-bk-outer{grid-template-columns:1fr}
 }
 
+/* ANUAL — badges de variação */
+.tbl-badge{display:inline-block;font-size:10px;border-radius:4px;padding:1px 5px;margin-top:2px;font-weight:600;white-space:nowrap}
+.tbl-badge.up{background:#e8f7f1;color:#0d7a4e}
+.tbl-badge.dn{background:#fef2f2;color:#b91c1c}
+
+/* ANUAL — line chart cards */
+.line-chart-card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);padding:18px}
+.line-chart-card h3{font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
+
 /* HAMBURGUER */
 .hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px 8px;
   border-radius:7px;font-size:20px;line-height:1;color:var(--txt);margin-right:8px}
@@ -525,6 +534,17 @@ td.purple{color:var(--purple);font-weight:600}
       <div class="chart-card"><h3>ROAS por Mês</h3><div class="ch h240"><canvas id="ch-roas"></canvas></div></div>
       <div class="chart-card"><h3>Consultas por Modalidade</h3><div class="ch h240"><canvas id="ch-consul"></canvas></div></div>
       <div class="chart-card"><h3>Leads & MQL por Mês</h3><div class="ch h240"><canvas id="ch-leads"></canvas></div></div>
+    </div>
+    <div class="sdiv">Evolução por Métrica</div>
+    <div class="grid g2">
+      <div class="line-chart-card"><h3>Investimento (R$)</h3><div class="ch h240"><canvas id="ch-l-invest"></canvas></div></div>
+      <div class="line-chart-card"><h3>Leads Únicos</h3><div class="ch h240"><canvas id="ch-l-leads"></canvas></div></div>
+      <div class="line-chart-card"><h3>Leads Qualificados (MQL)</h3><div class="ch h240"><canvas id="ch-l-mql"></canvas></div></div>
+      <div class="line-chart-card"><h3>Consultas Particulares</h3><div class="ch h240"><canvas id="ch-l-part"></canvas></div></div>
+      <div class="line-chart-card"><h3>Cirurgias Particulares</h3><div class="ch h240"><canvas id="ch-l-cir"></canvas></div></div>
+      <div class="line-chart-card"><h3>Faturamento Total (R$)</h3><div class="ch h240"><canvas id="ch-l-fat"></canvas></div></div>
+      <div class="line-chart-card"><h3>ROAS (x)</h3><div class="ch h240"><canvas id="ch-l-roas"></canvas></div></div>
+      <div class="line-chart-card"><h3>ROI (x)</h3><div class="ch h240"><canvas id="ch-l-roi"></canvas></div></div>
     </div>
     <div class="sdiv">Tabela Anual Consolidada</div>
     <div class="tbl-card">
@@ -1071,16 +1091,20 @@ if (!D || !cli || cli.tpl !== 'medico') {
 
 // ── ANUAL ────────────────────────────────────
 function renderAnual(slug) {
-  const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  const meses = DB.getMeses(slug);
+  const meses  = DB.getMeses(slug);
   const labels = meses.map(m => m.split('/')[0]?.slice(0,3) || m);
   const rels   = meses.map(m => DB.getRel(slug, m) || {});
 
-  const vals = key => rels.map(r => r[key]||0);
+  const vals    = key => rels.map(r => r[key]||0);
   const fatArr  = rels.map(r => (r.part_fat||0)+(r.cir_fat||0));
   const roasArr = rels.map(r => {
     const ft = (r.part_fat||0)+(r.cir_fat||0);
     return r.invest > 0 ? ft/r.invest : 0;
+  });
+  const roiArr  = rels.map(r => {
+    const ft = (r.part_fat||0)+(r.cir_fat||0);
+    const ct = (r.invest||0)+(r.custo_agencia||0)+(r.custo_crm||0)+(r.custo_outros||0);
+    return ct > 0 ? (ft-ct)/ct : 0;
   });
 
   const BASE = {
@@ -1121,27 +1145,104 @@ function renderAnual(slug) {
       {label:'MQL',  data:vals('mql'),  backgroundColor:'rgba(109,40,217,.6)',borderColor:'#6d28d9',borderWidth:2,borderRadius:4},
     ]},options:BASE});
 
-  // Tabela anual
+  // ── 8 GRÁFICOS DE LINHA POR MÉTRICA ──────
+  const LINE_COLOR = '#1a4a8a';
+  const makeLineChart = (id, data, fmtType) => {
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+    const fmts = {
+      brl: n => 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}),
+      num: n => n.toLocaleString('pt-BR'),
+      x:   n => n.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'x',
+    };
+    const fmt = fmts[fmtType] || fmts.num;
+    new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          data,
+          borderColor: LINE_COLOR,
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: LINE_COLOR,
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          tension: 0.4,
+          fill: true,
+          backgroundColor: context => {
+            const {ctx: c, chartArea} = context.chart;
+            if (!chartArea) return 'rgba(26,74,138,0.12)';
+            const g = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            g.addColorStop(0, 'rgba(26,74,138,0.22)');
+            g.addColorStop(1, 'rgba(26,74,138,0.0)');
+            return g;
+          },
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {display: false},
+          tooltip: {
+            backgroundColor: '#fff', titleColor: '#1e293b', bodyColor: '#475569',
+            borderColor: 'rgba(0,0,0,.1)', borderWidth: 1,
+            callbacks: {label: ctx => ' ' + fmt(ctx.raw || 0)}
+          }
+        },
+        scales: {
+          x: {grid:{color:'rgba(0,0,0,.05)'}, ticks:{color:'#94a3b8',font:{size:9}}},
+          y: {grid:{color:'rgba(0,0,0,.05)'}, ticks:{color:'#94a3b8',font:{size:9},callback: v => fmt(v)}}
+        }
+      }
+    });
+  };
+
+  makeLineChart('ch-l-invest', vals('invest'),  'brl');
+  makeLineChart('ch-l-leads',  vals('leads'),   'num');
+  makeLineChart('ch-l-mql',    vals('mql'),     'num');
+  makeLineChart('ch-l-part',   vals('part_n'),  'num');
+  makeLineChart('ch-l-cir',    vals('cir_n'),   'num');
+  makeLineChart('ch-l-fat',    fatArr,           'brl');
+  makeLineChart('ch-l-roas',   roasArr,          'x');
+  makeLineChart('ch-l-roi',    roiArr,           'x');
+
+  // ── TABELA ANUAL COM BADGES ───────────────
+  const badge = (cur, prev) => {
+    if (prev === null || prev === undefined || prev === 0) return '';
+    const delta = (cur - prev) / Math.abs(prev) * 100;
+    const cls = delta >= 0 ? 'up' : 'dn';
+    const sym = delta >= 0 ? '▲' : '▼';
+    return `<span class="tbl-badge ${cls}">${sym}&nbsp;${Math.abs(delta).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})}%</span>`;
+  };
+
   const t = `<table><thead><tr>
     <th>Mês</th><th class="r">Invest.</th><th class="r">Leads</th><th class="r">MQL</th>
     <th class="r">Conv.</th><th class="r">Part.</th><th class="r">Cir.</th>
     <th class="r">Fat. Total</th><th class="r">ROAS</th><th class="r">ROI</th>
   </tr></thead><tbody>${rels.map((r,i) => {
-    const ft = (r.part_fat||0)+(r.cir_fat||0);
-    const ct = (r.invest||0)+(r.custo_agencia||0)+(r.custo_crm||0)+(r.custo_outros||0);
-    const rs = r.invest > 0 ? ft/r.invest : 0;
-    const ri = ct > 0 ? (ft-ct)/ct*100 : 0;
+    const rp  = i > 0 ? rels[i-1] : null;
+    const ft  = (r.part_fat||0)+(r.cir_fat||0);
+    const ct  = (r.invest||0)+(r.custo_agencia||0)+(r.custo_crm||0)+(r.custo_outros||0);
+    const rs  = r.invest > 0 ? ft/r.invest : 0;
+    const ri  = ct > 0 ? (ft-ct)/ct*100 : 0;
+    const ftp = rp ? (rp.part_fat||0)+(rp.cir_fat||0) : null;
+    const ctp = rp ? (rp.invest||0)+(rp.custo_agencia||0)+(rp.custo_crm||0)+(rp.custo_outros||0) : null;
+    const rsp = (rp && rp.invest > 0) ? ftp/rp.invest : null;
+    const rip = (ctp && ctp > 0) ? (ftp-ctp)/ctp*100 : null;
+    const v   = key => rp ? rp[key]||0 : null;
     return `<tr>
       <td><strong>${meses[i]}</strong></td>
-      <td class="r">${brl(r.invest)}</td>
-      <td class="r blue">${num(r.leads)}</td>
-      <td class="r purple">${num(r.mql)}</td>
-      <td class="r red">${num(r.conv_n)}</td>
-      <td class="r green">${num(r.part_n)}</td>
-      <td class="r purple">${num(r.cir_n)}</td>
-      <td class="r green">${brl(ft)}</td>
-      <td class="r blue">${pct1(rs)}x</td>
-      <td class="r ${ri>=0?'green':'red'}">${pct1(ri/100)}x</td>
+      <td class="r">${brl(r.invest)}<br>${badge(r.invest||0, v('invest'))}</td>
+      <td class="r blue">${num(r.leads)}<br>${badge(r.leads||0, v('leads'))}</td>
+      <td class="r purple">${num(r.mql)}<br>${badge(r.mql||0, v('mql'))}</td>
+      <td class="r red">${num(r.conv_n)}<br>${badge(r.conv_n||0, v('conv_n'))}</td>
+      <td class="r green">${num(r.part_n)}<br>${badge(r.part_n||0, v('part_n'))}</td>
+      <td class="r purple">${num(r.cir_n)}<br>${badge(r.cir_n||0, v('cir_n'))}</td>
+      <td class="r green">${brl(ft)}<br>${badge(ft, ftp)}</td>
+      <td class="r blue">${pct1(rs)}x<br>${badge(rs, rsp)}</td>
+      <td class="r ${ri>=0?'green':'red'}">${pct1(ri/100)}x<br>${badge(ri, rip)}</td>
     </tr>`;
   }).join('')}</tbody></table>`;
   document.getElementById('tbl-anual').innerHTML = t;
