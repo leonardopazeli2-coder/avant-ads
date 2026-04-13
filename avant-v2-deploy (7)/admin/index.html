@@ -821,6 +821,12 @@ function toast(msg) {
 }
 
 // ── AUTH ────────────────────────────────────
+// Hashes fixos — senhas definidas no código, funcionam em qualquer navegador/dispositivo
+const HASHES = {
+  admin: '0315a67fecc64a6bfa029d4c7e004f09a675c6c4433fab1484e242071ad73b70',
+  colab: '7cc7b8a9e8c500509d2b85acae734e700676f11e45f2338370e3421f8a80ae66'
+};
+
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
@@ -835,12 +841,9 @@ function authCheck() {
     if (lbl) lbl.textContent = labels[user] || user;
     return;
   }
-  const needsSetup = !localStorage.getItem('avant2_pwd_admin');
-  if (needsSetup) {
-    document.getElementById('auth-login').style.display = 'none';
-    document.getElementById('auth-setup').style.display = 'block';
-  }
-  // auth-screen stays visible
+  // Sempre exibe login — setup nunca é necessário
+  document.getElementById('auth-login').style.display = 'block';
+  document.getElementById('auth-setup').style.display = 'none';
 }
 
 async function doLogin() {
@@ -848,9 +851,8 @@ async function doLogin() {
   const pass  = document.getElementById('auth-pass').value;
   const errEl = document.getElementById('auth-err');
   if (!pass) { errEl.textContent='Digite a senha.'; errEl.style.display='block'; return; }
-  const hash   = await sha256(pass);
-  const stored = localStorage.getItem('avant2_pwd_' + user);
-  if (stored && stored === hash) {
+  const hash = await sha256(pass);
+  if (hash === HASHES[user]) {
     sessionStorage.setItem('avant2_auth', user);
     document.getElementById('auth-screen').style.display = 'none';
     const labels = { admin: 'Admin', colab: 'Colaborador' };
@@ -864,29 +866,7 @@ async function doLogin() {
   }
 }
 
-async function doSetup() {
-  const adminP  = document.getElementById('setup-admin').value;
-  const adminP2 = document.getElementById('setup-admin2').value;
-  const colabP  = document.getElementById('setup-colab').value;
-  const colabP2 = document.getElementById('setup-colab2').value;
-  const errEl   = document.getElementById('setup-err');
-  if (adminP.length < 6 || colabP.length < 6) {
-    errEl.textContent='As senhas precisam ter ao menos 6 caracteres.'; errEl.style.display='block'; return;
-  }
-  if (adminP !== adminP2) {
-    errEl.textContent='As senhas do Administrador não coincidem.'; errEl.style.display='block'; return;
-  }
-  if (colabP !== colabP2) {
-    errEl.textContent='As senhas do Colaborador não coincidem.'; errEl.style.display='block'; return;
-  }
-  const [adminH, colabH] = await Promise.all([sha256(adminP), sha256(colabP)]);
-  localStorage.setItem('avant2_pwd_admin', adminH);
-  localStorage.setItem('avant2_pwd_colab', colabH);
-  sessionStorage.setItem('avant2_auth', 'admin');
-  document.getElementById('auth-screen').style.display = 'none';
-  const lbl = document.getElementById('sb-user-lbl');
-  if (lbl) lbl.textContent = 'Admin';
-}
+function doSetup() {} // desativado — senhas gerenciadas via código
 
 function authLogout() {
   sessionStorage.removeItem('avant2_auth');
