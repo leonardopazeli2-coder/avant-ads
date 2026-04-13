@@ -93,16 +93,27 @@ main{flex:1;overflow-y:auto}
 .seg-val{font-size:13px;font-weight:700}
 .seg-card.conv .seg-val{color:var(--red)}.seg-card.part .seg-val{color:var(--green)}.seg-card.cir .seg-val{color:var(--purple)}
 
-/* FUNIL */
+/* FUNIL VISUAL */
 .funnel{background:var(--card);border:0.5px solid var(--b);border-radius:var(--r);padding:18px}
 .funnel-title{font-size:12px;font-weight:700;color:var(--txt);margin-bottom:16px}
-.funnel-step{margin-bottom:10px}
-.funnel-step-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
-.funnel-step-lbl{font-size:11px;font-weight:600;color:var(--txt2)}
-.funnel-step-val{font-size:12px;font-weight:700;color:var(--acc)}
-.funnel-bar{height:8px;border-radius:4px;background:#e2e8f0;overflow:hidden}
-.funnel-fill{height:100%;border-radius:4px;transition:width 1s cubic-bezier(.4,0,.2,1)}
-.funnel-meta{font-size:9px;color:var(--txt3);margin-top:3px}
+.fv-wrap{display:flex;flex-direction:column;align-items:center;gap:0}
+.fv-step{width:100%;display:flex;justify-content:center}
+.fv-band{display:flex;justify-content:space-between;align-items:center;
+  padding:11px 14px;border-radius:8px;width:100%;
+  transition:width .9s cubic-bezier(.4,0,.2,1);min-width:22%}
+.fv-band-lbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.9);letter-spacing:.1px}
+.fv-band-val{font-size:15px;font-weight:800;color:#fff}
+.fv-conn{display:flex;align-items:center;gap:8px;width:100%;padding:6px 4px}
+.fv-conn-line{flex:1;height:1px;background:var(--b)}
+.fv-conn-badge{font-size:9px;font-weight:700;padding:2px 9px;border-radius:20px;
+  background:#f0f4f8;color:var(--txt2);white-space:nowrap}
+.fv-meta{margin-top:14px;display:flex;flex-direction:column;gap:0;
+  border-top:1px solid var(--b);padding-top:12px}
+.fv-meta-row{display:flex;justify-content:space-between;align-items:center;
+  padding:5px 0;border-bottom:.5px solid var(--b)}
+.fv-meta-row:last-child{border-bottom:none}
+.fv-meta-lbl{font-size:10px;color:var(--txt3)}
+.fv-meta-val{font-size:11px;font-weight:700;color:var(--txt)}
 
 /* PvX */
 .pvx{background:var(--card);border:0.5px solid var(--b);border-radius:var(--r);padding:18px}
@@ -450,25 +461,52 @@ td.purple{color:var(--purple);font-weight:600}
     <div class="sdiv">Jornada do Paciente</div>
     <div class="grid g2">
       <div class="funnel">
-        <div class="funnel-title">Funil de Conversão</div>
-        <div class="funnel-step">
-          <div class="funnel-step-hd"><span class="funnel-step-lbl">Total Atendimentos</span><span class="funnel-step-val" id="fn-atend">—</span></div>
-          <div class="funnel-bar"><div class="funnel-fill" id="fb-atend" style="background:var(--acc2);width:100%"></div></div>
+        <div class="funnel-title">Jornada do Paciente</div>
+        <div class="fv-wrap">
+          <div class="fv-step">
+            <div class="fv-band" id="fv-atend" style="background:var(--acc2)">
+              <span class="fv-band-lbl">Total Atendimentos</span>
+              <span class="fv-band-val" id="fn-atend">—</span>
+            </div>
+          </div>
+          <div class="fv-conn">
+            <div class="fv-conn-line"></div>
+            <span class="fv-conn-badge" id="fn-pct-leads">—</span>
+            <div class="fv-conn-line"></div>
+          </div>
+          <div class="fv-step">
+            <div class="fv-band" id="fv-leads" style="background:var(--acc)">
+              <span class="fv-band-lbl">Leads Únicos</span>
+              <span class="fv-band-val" id="fn-leads">—</span>
+            </div>
+          </div>
+          <div class="fv-conn">
+            <div class="fv-conn-line"></div>
+            <span class="fv-conn-badge" id="fn-pct-mql">—</span>
+            <div class="fv-conn-line"></div>
+          </div>
+          <div class="fv-step">
+            <div class="fv-band" id="fv-mql" style="background:#6d28d9">
+              <span class="fv-band-lbl">MQL</span>
+              <span class="fv-band-val" id="fn-mql">—</span>
+            </div>
+          </div>
+          <div class="fv-conn">
+            <div class="fv-conn-line"></div>
+            <span class="fv-conn-badge" id="fn-pct-conv">—</span>
+            <div class="fv-conn-line"></div>
+          </div>
+          <div class="fv-step">
+            <div class="fv-band" id="fv-conv" style="background:var(--green2)">
+              <span class="fv-band-lbl">Conv. (Part+Cir)</span>
+              <span class="fv-band-val" id="fn-conv">—</span>
+            </div>
+          </div>
         </div>
-        <div class="funnel-step">
-          <div class="funnel-step-hd"><span class="funnel-step-lbl">Leads Únicos</span><span class="funnel-step-val" id="fn-leads">—</span></div>
-          <div class="funnel-bar"><div class="funnel-fill" id="fb-leads" style="background:var(--acc);width:0%"></div></div>
-          <div class="funnel-meta" id="fm-leads">CPL: —</div>
-        </div>
-        <div class="funnel-step">
-          <div class="funnel-step-hd"><span class="funnel-step-lbl">MQL (Leads Qualif.)</span><span class="funnel-step-val" id="fn-mql">—</span></div>
-          <div class="funnel-bar"><div class="funnel-fill" id="fb-mql" style="background:#6d28d9;width:0%"></div></div>
-          <div class="funnel-meta" id="fm-mql">Custo/MQL: — · % MQL/Leads: —</div>
-        </div>
-        <div class="funnel-step">
-          <div class="funnel-step-hd"><span class="funnel-step-lbl">Conv. (Part+Cir)</span><span class="funnel-step-val" id="fn-conv">—</span></div>
-          <div class="funnel-bar"><div class="funnel-fill" id="fb-conv" style="background:var(--green2);width:0%"></div></div>
-          <div class="funnel-meta" id="fm-conv">TC Total/Leads: — · Custo/Conv.: —</div>
+        <div class="fv-meta">
+          <div class="fv-meta-row"><span class="fv-meta-lbl">CPL</span><span class="fv-meta-val" id="fm-leads">—</span></div>
+          <div class="fv-meta-row"><span class="fv-meta-lbl">Custo / MQL</span><span class="fv-meta-val" id="fm-mql">—</span></div>
+          <div class="fv-meta-row"><span class="fv-meta-lbl">TC Total / Custo por Conv.</span><span class="fv-meta-val" id="fm-conv">—</span></div>
         </div>
       </div>
 
@@ -973,15 +1011,25 @@ function renderMes(mes) {
   s('vg-roas',     pct1(roas) + 'x');
   s('vg-roi',      pct1(roi / 100) + 'x');
 
-  // FUNIL
-  const maxF = Math.max(D.atend||0, 1);
-  s('fn-atend', num(D.atend)); bar('fb-atend', 100);
-  s('fn-leads', num(D.leads)); bar('fb-leads', (D.leads||0)/maxF*100);
-  s('fn-mql',   num(D.mql));   bar('fb-mql',   (D.mql||0)/maxF*100);
-  s('fn-conv',  num(convTot)); bar('fb-conv',   convTot/maxF*100);
-  s('fm-leads', `CPL: ${brl(cpl)}`);
-  s('fm-mql',   `Custo/MQL: ${brl(cmql)} · ${pct1(mql_pct)}% dos leads`);
-  s('fm-conv',  `TC Total/Leads: ${pct1(tc_tot)}% · Custo/Conv.: ${brl(cconv)}`);
+  // FUNIL VISUAL
+  const maxF   = Math.max(D.atend||0, 1);
+  const pLeads = D.atend  > 0 ? (D.leads||0)  / D.atend  * 100 : 0;
+  const pMql   = D.leads  > 0 ? (D.mql||0)    / D.leads  * 100 : 0;
+  const pConv  = D.mql    > 0 ? convTot        / D.mql    * 100 : 0;
+  function fvw(id, pct) {
+    const el = document.getElementById(id);
+    if (el) setTimeout(() => el.style.width = Math.min(100, Math.max(20, pct)) + '%', 50);
+  }
+  s('fn-atend', num(D.atend));
+  s('fn-leads', num(D.leads)); fvw('fv-leads', pLeads);
+  s('fn-mql',   num(D.mql));   fvw('fv-mql',   (D.mql||0)/maxF*100);
+  s('fn-conv',  num(convTot)); fvw('fv-conv',   convTot/maxF*100);
+  s('fn-pct-leads', pct1(pLeads) + '% → leads');
+  s('fn-pct-mql',   pct1(pMql)   + '% → MQL');
+  s('fn-pct-conv',  pct1(pConv)  + '% → conv.');
+  s('fm-leads', brl(cpl));
+  s('fm-mql',   `${brl(cmql)} · ${pct1(mql_pct)}% dos leads`);
+  s('fm-conv',  `${pct1(tc_tot)}% leads · ${brl(cconv)}/conv.`);
   s('fn-cat',   brl(cat)); s('fn-cpl', brl(cpl)); s('fn-cmql', brl(cmql)); s('fn-cconv', brl(cconv));
   s('fn-tc-atend', pct1(part_tca + cir_tca)+'%');
 
