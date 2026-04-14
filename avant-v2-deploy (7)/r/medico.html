@@ -63,9 +63,10 @@ main{flex:1;overflow-y:auto}
 /* GRIDS */
 .grid{display:grid;gap:11px;margin-bottom:14px}
 .g4{grid-template-columns:repeat(4,1fr)}
+.g5{grid-template-columns:repeat(5,1fr)}
 .g3{grid-template-columns:repeat(3,1fr)}
 .g2{grid-template-columns:repeat(2,1fr)}
-@media(max-width:900px){.g4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){.g4{grid-template-columns:repeat(2,1fr)}.g5{grid-template-columns:repeat(2,1fr)}}
 
 /* KPI CARD */
 .kpi{background:var(--card);border:0.5px solid var(--b);border-radius:var(--r);padding:16px;
@@ -327,6 +328,7 @@ td.purple{color:var(--purple);font-weight:600}
   .hamburger{display:inline-flex;align-items:center;justify-content:center}
   .sec{padding:14px 14px 60px}
   .g4{grid-template-columns:repeat(2,1fr)!important}
+  .g5{grid-template-columns:repeat(2,1fr)!important}
   .g3{grid-template-columns:repeat(2,1fr)}
   .kpi{padding:13px 12px}
   .kpi-val{font-size:18px}
@@ -385,10 +387,16 @@ td.purple{color:var(--purple);font-weight:600}
   <!-- VISÃO GERAL -->
   <div class="sec active" id="sec-visao">
     <div class="vg-sdiv">Investimento &amp; Funil</div>
-    <div class="grid g4">
+    <div class="grid g5">
       <div class="vg-kpi">
         <div class="vg-kpi-icon" style="background:#F3EFFF;color:#7C3AED">💰</div>
-        <div class="vg-kpi-lbl">Investimento</div>
+        <div class="vg-kpi-lbl">Investimento Bruto</div>
+        <div class="vg-kpi-val" id="vg-invest-bruto">—</div>
+        <div class="vg-kpi-sub">Anúncios Meta + Impostos</div>
+      </div>
+      <div class="vg-kpi">
+        <div class="vg-kpi-icon" style="background:#F3EFFF;color:#7C3AED">💰</div>
+        <div class="vg-kpi-lbl">Investimento Líquido</div>
         <div class="vg-kpi-val" id="vg-invest">—</div>
         <div class="vg-kpi-sub">Anúncios Meta</div>
       </div>
@@ -948,6 +956,7 @@ function renderMes(mes) {
   s('tb-period', D.periodo || D.mesAno);
 
   // VISÃO GERAL
+  s('vg-invest-bruto', brl((D.invest||0) + (D.impostos||0)));
   s('vg-invest',   brl(D.invest));
   s('vg-atend',    num(D.atend));
   s('vg-cat-sub',  'Custo/Atend.: ' + brl(cat));
