@@ -932,7 +932,7 @@ function renderMes(mes) {
   // Calcular derivados
   const convTot = (D.part_n||0) + (D.cir_n||0);
   const fatTot  = (D.part_fat||0) + (D.cir_fat||0); // convênio não tem faturamento neste relatório
-  const custoTot= (D.invest||0) + (D.custo_agencia||0) + (D.custo_crm||0) + (D.custo_outros||0);
+  const custoTot= (D.invest_bruto||0) + (D.custo_agencia||0) + (D.custo_crm||0) + (D.custo_outros||0);
   const roas    = D.invest > 0 ? fatTot / D.invest : 0;
   const roi     = custoTot > 0 ? (fatTot - custoTot) / custoTot * 100 : 0;
   const cpl     = D.leads > 0 ? (D.invest||0) / D.leads : 0;
