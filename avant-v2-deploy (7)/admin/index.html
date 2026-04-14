@@ -692,7 +692,8 @@ const FIELDS_GEN = [
     {id:'obj',label:'Objetivo da Campanha',ph:'Ex: Visitas ao Perfil'},
   ]},
   { sec:'💰 Tráfego Pago (Meta Ads)', fields:[
-    {id:'invest',label:'Investimento (R$)',tp:'number',ph:'0'},
+    {id:'invest',label:'Investimento Líquido (R$)',tp:'number',ph:'0'},
+    {id:'impostos',label:'Impostos (R$)',tp:'number',ph:'0',step:'0.01'},
     {id:'alcance',label:'Alcance',tp:'number',ph:'0'},
     {id:'impressoes',label:'Impressões',tp:'number',ph:'0'},
     {id:'cpm',label:'CPM (R$)',tp:'number',ph:'0',step:'0.01'},

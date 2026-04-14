@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Avant Ads — Relatório de Performance</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="../assets/db.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
@@ -1567,6 +1568,78 @@ const numK = n => {
   return n.toLocaleString('pt-BR');
 };
 const pct  = n => n ? n.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}) : '0';
+
+// ══════════════════════
+// INIT FROM URL
+// ══════════════════════
+(function initFromUrl() {
+  const params  = new URLSearchParams(window.location.search);
+  const slug    = params.get('slug');
+  const urlData = params.get('d');
+  if (!slug) return;
+
+  // Importa dados da URL para localStorage
+  if (urlData) {
+    try {
+      const decoded = JSON.parse(decodeURIComponent(atob(urlData)));
+      Object.keys(localStorage).filter(k => k.startsWith('avant2_')).forEach(k => localStorage.removeItem(k));
+      for (const [k, v] of Object.entries(decoded)) {
+        if (v != null) localStorage.setItem(k, v);
+      }
+    } catch(e) {}
+  }
+
+  // Lê o relatório mais recente do cliente
+  const meses = DB.getMeses(slug);
+  if (!meses.length) return;
+  const d = DB.getRel(slug, meses[meses.length - 1]);
+  if (!d) return;
+
+  // Mapeamento: campo do DB → id do input no formulário
+  const MAP = {
+    periodo:    'i-periodo',
+    cli_nome:   'i-cliente',
+    camp_nome:  'i-camp-nome',
+    orcamento:  'i-orcamento',
+    obj:        'i-obj',
+    invest:     'i-invest',
+    impostos:   'i-impostos',
+    alcance:    'i-alcance',
+    impressoes: 'i-impressoes',
+    cpm:        'i-cpm',
+    visitas:    'i-visitas',
+    seg_ads:    'i-seg-ads',
+    m_visitas:  'm-visitas',
+    m_seg:      'm-seg',
+    m_cpv:      'm-cpv',
+    m_cps:      'm-cps',
+    viz:        'i-viz',
+    viz_d:      'i-viz-d',
+    viz_org:    'i-viz-org',
+    viz_ads:    'i-viz-ads',
+    alc:        'i-alc',
+    alc_d:      'i-alc-d',
+    alc_org:    'i-alc-org',
+    alc_ads:    'i-alc-ads',
+    vis:        'i-vis',
+    vis_d:      'i-vis-d',
+    seg:        'i-seg',
+    seg_d:      'i-seg-d',
+    int_cont:   'i-int',
+    int_d:      'i-int-d',
+    clk:        'i-clk',
+    loc1:       'i-loc1',
+    idade1:     'i-idade1',
+    int1:       'i-int1',
+  };
+
+  for (const [dbKey, inputId] of Object.entries(MAP)) {
+    const el = document.getElementById(inputId);
+    if (el && d[dbKey] !== undefined) el.value = d[dbKey];
+  }
+
+  saveData();
+})();
 </script>
 </body>
 </html>
