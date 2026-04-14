@@ -1127,8 +1127,8 @@ td.acc-a { color: var(--acc3); font-weight: 600; }
     <div class="input-group">
       <h3>💰 Tráfego Pago (Meta Ads)</h3>
       <div class="inp-grid">
+        <div class="inp-field"><label>Investimento Bruto (R$)</label><input id="i-invest-bruto" type="number" placeholder="0"></div>
         <div class="inp-field"><label>Investimento Líquido (R$)</label><input id="i-invest" type="number" placeholder="0"></div>
-        <div class="inp-field"><label>Impostos (R$)</label><input id="i-impostos" type="number" placeholder="0" step="0.01"></div>
         <div class="inp-field"><label>Alcance</label><input id="i-alcance" type="number" placeholder="0"></div>
         <div class="inp-field"><label>Impressões</label><input id="i-impressoes" type="number" placeholder="0"></div>
         <div class="inp-field"><label>CPM (R$)</label><input id="i-cpm" type="number" placeholder="0" step="0.01"></div>
@@ -1246,8 +1246,8 @@ function saveData() {
     idade1:    s('i-idade1'),
     int1:      s('i-int1'),
 
-    invest:    g('i-invest'),
-    impostos:  g('i-impostos'),
+    investBruto: g('i-invest-bruto'),
+    invest:      g('i-invest'),
     alcance:   g('i-alcance'),
     impressoes:g('i-impressoes'),
     cpm:       g('i-cpm'),
@@ -1272,7 +1272,6 @@ function saveData() {
     alcAds:    g('i-alc-ads'),
   };
 
-  D.investBruto = D.invest + D.impostos;
   D.cpv = D.visitas > 0 ? D.invest / D.visitas : 0;
   D.cps = D.segAds > 0 ? D.invest / D.segAds : 0;
   D.restante = D.orcamento - D.invest;
@@ -1602,8 +1601,8 @@ const pct  = n => n ? n.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumF
     camp_nome:  'i-camp-nome',
     orcamento:  'i-orcamento',
     obj:        'i-obj',
-    invest:     'i-invest',
-    impostos:   'i-impostos',
+    invest_bruto: 'i-invest-bruto',
+    invest:       'i-invest',
     alcance:    'i-alcance',
     impressoes: 'i-impressoes',
     cpm:        'i-cpm',

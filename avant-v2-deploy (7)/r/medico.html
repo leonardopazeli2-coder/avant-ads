@@ -956,7 +956,7 @@ function renderMes(mes) {
   s('tb-period', D.periodo || D.mesAno);
 
   // VISÃO GERAL
-  s('vg-invest-bruto', brl((D.invest||0) + (D.impostos||0)));
+  s('vg-invest-bruto', brl(D.invest_bruto||0));
   s('vg-invest',   brl(D.invest));
   s('vg-atend',    num(D.atend));
   s('vg-cat-sub',  'Custo/Atend.: ' + brl(cat));
