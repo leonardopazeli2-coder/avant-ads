@@ -160,6 +160,7 @@ main {
 /* ── CARDS ── */
 .card-grid { display: grid; gap: 16px; margin-bottom: 24px; }
 .g4 { grid-template-columns: repeat(4, 1fr); }
+.g5 { grid-template-columns: repeat(5, 1fr); }
 .g3 { grid-template-columns: repeat(3, 1fr); }
 .g2 { grid-template-columns: repeat(2, 1fr); }
 .g2-1 { grid-template-columns: 2fr 1fr; }
@@ -491,11 +492,11 @@ td.acc-a { color: var(--acc3); font-weight: 600; }
 .bk-prog-seg.a { background: var(--acc3); }
 
 /* ── RESPONSIVE ── */
-@media(max-width:1100px) { .g4{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:1100px) { .g4{grid-template-columns:repeat(2,1fr)} .g5{grid-template-columns:repeat(2,1fr)} }
 @media(max-width:800px) {
   aside{display:none}
   main{margin-left:0}
-  .g4,.g3,.g2,.g2-1,.g1-2{grid-template-columns:1fr}
+  .g5,.g4,.g3,.g2,.g2-1,.g1-2{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -566,12 +567,18 @@ td.acc-a { color: var(--acc3); font-weight: 600; }
 
     <!-- KPIs Tráfego Pago -->
     <div class="sec-div">Tráfego Pago</div>
-    <div class="card-grid g4">
+    <div class="card-grid g5">
       <div class="metric-card c-green">
         <div class="mc-icon g">💰</div>
-        <div class="mc-lbl">Investimento</div>
+        <div class="mc-lbl">Investimento Bruto</div>
+        <div class="mc-val w" id="vg-invest-bruto">R$ —</div>
+        <div class="mc-sub">Anúncios Meta + Impostos</div>
+      </div>
+      <div class="metric-card c-green">
+        <div class="mc-icon g">💰</div>
+        <div class="mc-lbl">Investimento Líquido</div>
         <div class="mc-val w" id="vg-invest">R$ —</div>
-        <div class="mc-sub">Verba investida no período</div>
+        <div class="mc-sub">Anúncios Meta</div>
       </div>
       <div class="metric-card c-blue">
         <div class="mc-icon b">👁️</div>
@@ -1119,7 +1126,8 @@ td.acc-a { color: var(--acc3); font-weight: 600; }
     <div class="input-group">
       <h3>💰 Tráfego Pago (Meta Ads)</h3>
       <div class="inp-grid">
-        <div class="inp-field"><label>Investimento Realizado (R$)</label><input id="i-invest" type="number" placeholder="0"></div>
+        <div class="inp-field"><label>Investimento Líquido (R$)</label><input id="i-invest" type="number" placeholder="0"></div>
+        <div class="inp-field"><label>Impostos (R$)</label><input id="i-impostos" type="number" placeholder="0" step="0.01"></div>
         <div class="inp-field"><label>Alcance</label><input id="i-alcance" type="number" placeholder="0"></div>
         <div class="inp-field"><label>Impressões</label><input id="i-impressoes" type="number" placeholder="0"></div>
         <div class="inp-field"><label>CPM (R$)</label><input id="i-cpm" type="number" placeholder="0" step="0.01"></div>
@@ -1238,6 +1246,7 @@ function saveData() {
     int1:      s('i-int1'),
 
     invest:    g('i-invest'),
+    impostos:  g('i-impostos'),
     alcance:   g('i-alcance'),
     impressoes:g('i-impressoes'),
     cpm:       g('i-cpm'),
@@ -1262,6 +1271,7 @@ function saveData() {
     alcAds:    g('i-alc-ads'),
   };
 
+  D.investBruto = D.invest + D.impostos;
   D.cpv = D.visitas > 0 ? D.invest / D.visitas : 0;
   D.cps = D.segAds > 0 ? D.invest / D.segAds : 0;
   D.restante = D.orcamento - D.invest;
@@ -1291,6 +1301,7 @@ function updateDOM() {
   document.getElementById('tb-period').textContent  = D.periodo  || '—';
 
   // Visão Geral — tráfego pago
+  set('vg-invest-bruto', brl(D.investBruto));
   set('vg-invest',    brl(D.invest));
   set('vg-alcance',   num(D.alcance));
   set('vg-cpm',       brl(D.cpm));
