@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Avant Ads — Migração de Dados</title>
+<style>
+  body{font-family:system-ui,sans-serif;background:#f0f4f8;display:flex;align-items:center;
+    justify-content:center;min-height:100vh;margin:0;padding:20px}
+  .box{background:#fff;border-radius:16px;padding:36px;max-width:500px;width:100%;
+    box-shadow:0 8px 32px rgba(0,0,0,.12)}
+  h1{font-size:20px;font-weight:800;color:#0C447C;margin-bottom:6px}
+  p{font-size:13px;color:#475569;margin-bottom:20px;line-height:1.6}
+  .btn{width:100%;padding:13px;border-radius:10px;background:#185FA5;color:#fff;
+    font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:8px}
+  .btn:hover{opacity:.88}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn-d{background:#dc2626}
+  .log{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;
+    font-size:12px;font-family:monospace;margin-top:16px;max-height:260px;overflow-y:auto;
+    white-space:pre-wrap;display:none}
+  .ok{color:#0d7a4e}.er{color:#dc2626}.info{color:#475569}
+  label{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;
+    letter-spacing:.5px;display:block;margin-bottom:5px}
+  input{width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;
+    font-size:13px;margin-bottom:14px;box-sizing:border-box;outline:none}
+  input:focus{border-color:#185FA5}
+  .warn{background:#fef9ec;border:1px solid #fcd34d;border-radius:8px;padding:12px;
+    font-size:12px;color:#92400e;margin-bottom:16px}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>Migração de Dados</h1>
+  <p>Esta página lê os dados salvos <strong>neste navegador</strong> e os envia para o banco de dados do Supabase.</p>
+
+  <div class="warn">⚠ Abra esta página no <strong>mesmo navegador e computador</strong> onde você usava o sistema antigo.</div>
+
+  <div id="step-login">
+    <label>Email do admin</label>
+    <input type="email" id="email" placeholder="admin@avantads.com">
+    <label>Senha</label>
+    <input type="password" id="senha" placeholder="Sua senha">
+    <button class="btn" onclick="iniciar()">Verificar dados e migrar</button>
+  </div>
+
+  <div id="step-done" style="display:none">
+    <p style="color:#0d7a4e;font-weight:700">✓ Migração concluída! Você já pode fechar esta página e acessar o admin normalmente.</p>
+  </div>
+
+  <div class="log" id="log"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://ildowldbpvvxustytbuy.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_t8-Maz88JD6DzNie8olvDQ_WTW93HRW';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const PFX = 'avant2_';
+
+const logEl = document.getElementById('log');
+function log(msg, cls='info') {
+  logEl.style.display = 'block';
+  logEl.innerHTML += `<span class="${cls}">${msg}</span>\n`;
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+async function iniciar() {
+  const email = document.getElementById('email').value.trim();
+  const senha = document.getElementById('senha').value;
+  if (!email || !senha) { alert('Preencha email e senha.'); return; }
+
+  document.querySelector('.btn').disabled = true;
+  document.querySelector('.btn').textContent = 'Migrando...';
+
+  // 1. Login
+  log('Autenticando...');
+  const { error: authErr } = await sb.auth.signInWithPassword({ email, password: senha });
+  if (authErr) { log('Erro de autenticação: ' + authErr.message, 'er'); document.querySelector('.btn').disabled=false; document.querySelector('.btn').textContent='Tentar novamente'; return; }
+  log('Autenticado com sucesso.', 'ok');
+
+  // 2. Lê clientes do localStorage
+  const cliRaw = localStorage.getItem(PFX + 'clientes');
+  if (!cliRaw) { log('Nenhum dado encontrado neste navegador.\nCertifique-se de abrir esta página no navegador onde o sistema era usado.', 'er'); return; }
+
+  const clientes = JSON.parse(cliRaw);
+  log(`Encontrados ${clientes.length} cliente(s) no localStorage.`);
+
+  // 3. Migra clientes
+  for (const c of clientes) {
+    const row = {
+      slug:       c.slug,
+      nome:       c.nome,
+      tpl:        c.tpl || 'medico',
+      seg:        c.seg || '',
+      obs:        c.obs || '',
+      ultimo_mes: c.ultimoMes || '',
+      criado_em:  c.criadoEm || new Date().toISOString(),
+    };
+    const { error } = await sb.from('clientes').upsert(row, { onConflict: 'slug' });
+    if (error) log(`  ✗ Cliente "${c.nome}": ${error.message}`, 'er');
+    else       log(`  ✓ Cliente "${c.nome}" migrado.`, 'ok');
+  }
+
+  // 4. Lê e migra relatórios
+  const relKeys = Object.keys(localStorage).filter(k => k.startsWith(PFX + 'rel_'));
+  log(`\nEncontrados ${relKeys.length} relatório(s).`);
+
+  for (const key of relKeys) {
+    try {
+      const raw   = localStorage.getItem(key);
+      const obj   = JSON.parse(raw);
+      const slug  = obj.slug;
+      const mesAno = obj.mesAno;
+      if (!slug || !mesAno) { log(`  ✗ Chave ${key}: slug ou mesAno ausente.`, 'er'); continue; }
+
+      // dados = tudo exceto campos de controle
+      const { slug: _s, mesAno: _m, updatedAt: _u, ...dados } = obj;
+
+      const row = {
+        slug,
+        mes_ano:    mesAno,
+        dados,
+        updated_at: _u || new Date().toISOString(),
+      };
+      const { error } = await sb.from('relatorios').upsert(row, { onConflict: 'slug,mes_ano' });
+      if (error) log(`  ✗ Rel ${slug}/${mesAno}: ${error.message}`, 'er');
+      else       log(`  ✓ Rel ${slug}/${mesAno} migrado.`, 'ok');
+    } catch(e) {
+      log(`  ✗ Erro em ${key}: ${e.message}`, 'er');
+    }
+  }
+
+  // 5. Config (URL)
+  const cfgUrl = localStorage.getItem(PFX + 'cfg_url');
+  if (cfgUrl) {
+    await sb.from('config').upsert({ chave: 'url', valor: cfgUrl }, { onConflict: 'chave' });
+    log(`\n✓ URL salva: ${cfgUrl}`, 'ok');
+  }
+
+  log('\nMigração finalizada!', 'ok');
+  document.getElementById('step-login').style.display = 'none';
+  document.getElementById('step-done').style.display = 'block';
+}
+</script>
+</body>
+</html>
