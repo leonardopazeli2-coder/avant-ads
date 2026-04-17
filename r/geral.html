@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avant Ads — Relatório de Performance</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="../assets/db.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --bg:        #0a0e17;
+  --bg2:       #0f1520;
+  --card:      #131c2e;
+  --card2:     #182035;
+  --border:    rgba(255,255,255,.07);
+  --border2:   rgba(255,255,255,.12);
+  --acc:       #00e5a0;
+  --acc2:      #0ea5e9;
+  --acc3:      #f59e0b;
+  --acc4:      #f43f5e;
+  --text:      #e2e8f0;
+  --text2:     #94a3b8;
+  --text3:     #4a5568;
+  --head:      'Outfit', sans-serif;
+  --mono:      'JetBrains Mono', monospace;
+  --r:         14px;
+  --r2:        10px;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: var(--head);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── BG GLOW ── */
+body::before {
+  content: '';
+  position: fixed;
+  top: -200px; left: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(0,229,160,.05) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -200px; right: -200px;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(14,165,233,.04) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ── SIDEBAR ── */
+aside {
+  position: fixed; top: 0; left: 0;
+  width: 220px; height: 100vh;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  z-index: 100; padding: 0;
+}
+
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-logo .brand {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 4px;
+}
+.logo-dot {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--acc), var(--acc2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; color: #0a0e17;
+}
+.brand-name { font-size: 15px; font-weight: 800; letter-spacing: -.3px; }
+.brand-sub { font-size: 10px; color: var(--text3); letter-spacing: .8px; text-transform: uppercase; font-weight: 500; }
+
+.sidebar-client {
+  margin: 16px 12px 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 10px 12px;
+}
+.sidebar-client .lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .8px; color: var(--text3); margin-bottom: 4px; }
+.sidebar-client .cli-name { font-size: 13px; font-weight: 700; color: var(--acc); }
+.sidebar-client .cli-period { font-size: 10px; color: var(--text2); margin-top: 2px; }
+
+.sidebar-nav { padding: 20px 12px; flex: 1; }
+.nav-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .8px; color: var(--text3); margin-bottom: 10px; font-weight: 600; }
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: var(--r2);
+  font-size: 13px; font-weight: 500; color: var(--text2);
+  cursor: pointer; border: 1px solid transparent;
+  transition: all .2s; margin-bottom: 3px; user-select: none;
+}
+.nav-item:hover { background: var(--card); color: var(--text); }
+.nav-item.active {
+  background: rgba(0,229,160,.1);
+  border-color: rgba(0,229,160,.2);
+  color: var(--acc);
+}
+.nav-item .ni { font-size: 15px; }
+
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  font-size: 10px; color: var(--text3);
+}
+.sidebar-footer strong { color: var(--acc); }
+
+/* ── MAIN ── */
+main {
+  margin-left: 220px;
+  min-height: 100vh;
+  position: relative; z-index: 1;
+}
+
+.topbar {
+  padding: 20px 32px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(15,21,32,.8);
+  backdrop-filter: blur(8px);
+  position: sticky; top: 0; z-index: 50;
+}
+.topbar-title { font-size: 18px; font-weight: 700; }
+.topbar-title span { color: var(--text2); font-weight: 400; font-size: 14px; margin-left: 8px; }
+
+.period-badge {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12px; color: var(--text2);
+}
+.period-badge strong { color: var(--text); }
+.period-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--acc); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+
+/* ── SECTIONS ── */
+.section { display: none; padding: 28px 32px 60px; animation: fadeIn .25s ease; }
+.section.active { display: block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+.sec-header { margin-bottom: 24px; }
+.sec-header h2 { font-size: 22px; font-weight: 800; letter-spacing: -.4px; }
+.sec-header p { font-size: 13px; color: var(--text2); margin-top: 4px; }
+
+/* ── CARDS ── */
+.card-grid { display: grid; gap: 16px; margin-bottom: 24px; }
+.g4 { grid-template-columns: repeat(4, 1fr); }
+.g5 { grid-template-columns: repeat(5, 1fr); }
+.g3 { grid-template-columns: repeat(3, 1fr); }
+.g2 { grid-template-columns: repeat(2, 1fr); }
+.g2-1 { grid-template-columns: 2fr 1fr; }
+.g1-2 { grid-template-columns: 1fr 2fr; }
+
+.metric-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+  position: relative; overflow: hidden;
+  transition: border-color .2s, transform .2s;
+}
+.metric-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+.metric-card::after {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--acc-c, var(--acc)), transparent);
+  opacity: 0; transition: opacity .2s;
+}
+.metric-card:hover::after { opacity: 1; }
+.metric-card.c-green { --acc-c: var(--acc); }
+.metric-card.c-blue  { --acc-c: var(--acc2); }
+.metric-card.c-amber { --acc-c: var(--acc3); }
+.metric-card.c-red   { --acc-c: var(--acc4); }
+
+.mc-icon {
+  width: 34px; height: 34px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; margin-bottom: 14px;
+  flex-shrink: 0;
+}
+.mc-icon.g { background: rgba(0,229,160,.12); }
+.mc-icon.b { background: rgba(14,165,233,.12); }
+.mc-icon.a { background: rgba(245,158,11,.12); }
+.mc-icon.r { background: rgba(244,63,94,.12); }
+
+.mc-lbl { font-size: 11px; font-weight: 600; color: var(--text2); letter-spacing: .4px; text-transform: uppercase; margin-bottom: 6px; }
+.mc-val { font-size: 28px; font-weight: 800; letter-spacing: -.5px; line-height: 1; }
+.mc-val.g { color: var(--acc); }
+.mc-val.b { color: var(--acc2); }
+.mc-val.a { color: var(--acc3); }
+.mc-val.r { color: var(--acc4); }
+.mc-val.w { color: var(--text); }
+.mc-sub { font-size: 11px; color: var(--text3); margin-top: 7px; }
+
+.mc-delta {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 600;
+  padding: 3px 8px; border-radius: 20px; margin-top: 8px;
+}
+.mc-delta.up { background: rgba(0,229,160,.1); color: var(--acc); }
+.mc-delta.dn { background: rgba(244,63,94,.1); color: var(--acc4); }
+.mc-delta.nt { background: rgba(148,163,184,.1); color: var(--text2); }
+
+/* ── CHART CARDS ── */
+.chart-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 22px;
+}
+.chart-card h3 {
+  font-size: 13px; font-weight: 700; margin-bottom: 4px;
+}
+.chart-card .chart-sub { font-size: 11px; color: var(--text2); margin-bottom: 20px; }
+.chart-wrap { position: relative; }
+.h200 { height: 200px; }
+.h260 { height: 260px; }
+.h320 { height: 320px; }
+
+/* ── PLANEJADO VS EXECUTADO ── */
+.pvx-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 24px;
+}
+.pvx-header {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .6px;
+  color: var(--text2); margin-bottom: 22px;
+}
+.pvx-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--acc); }
+
+.pvx-row { margin-bottom: 22px; }
+.pvx-row-head {
+  display: flex; justify-content: space-between;
+  font-size: 13px; margin-bottom: 8px;
+}
+.pvx-row-head .pvx-label { color: var(--text2); font-weight: 500; }
+.pvx-row-head .pvx-vals { font-weight: 700; }
+.pvx-row-head .pvx-meta { color: var(--text3); font-size: 11px; }
+
+.prog-bar {
+  height: 8px; border-radius: 4px;
+  background: rgba(255,255,255,.06);
+  overflow: hidden; margin-bottom: 6px;
+}
+.prog-fill {
+  height: 100%; border-radius: 4px;
+  transition: width 1s cubic-bezier(.4,0,.2,1);
+}
+.prog-fill.g { background: linear-gradient(90deg, var(--acc), #00b377); }
+.prog-fill.b { background: linear-gradient(90deg, var(--acc2), #0284c7); }
+.prog-fill.a { background: linear-gradient(90deg, var(--acc3), #d97706); }
+.prog-fill.r { background: linear-gradient(90deg, var(--acc4), #e11d48); }
+
+.status-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 5px;
+  font-size: 10px; font-weight: 700; letter-spacing: .4px;
+}
+.status-pill.ok  { background: rgba(0,229,160,.12); color: var(--acc); border: 1px solid rgba(0,229,160,.2); }
+.status-pill.dn  { background: rgba(244,63,94,.12); color: var(--acc4); border: 1px solid rgba(244,63,94,.2); }
+.status-pill.nt  { background: rgba(245,158,11,.12); color: var(--acc3); border: 1px solid rgba(245,158,11,.2); }
+
+/* ── PROJEÇÃO ── */
+.proj-card {
+  background: linear-gradient(135deg, rgba(14,165,233,.08), rgba(0,229,160,.05));
+  border: 1px solid rgba(14,165,233,.2);
+  border-radius: var(--r);
+  padding: 24px;
+}
+.proj-card h3 {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .7px; color: var(--acc2); margin-bottom: 18px;
+}
+.proj-row {
+  display: flex; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.proj-row:last-child { border-bottom: none; }
+.proj-row .lbl { color: var(--text2); }
+.proj-row .val { font-weight: 700; font-family: var(--mono); }
+.proj-row .val.big { font-size: 22px; color: var(--acc); }
+
+/* ── SECTION DIVIDER ── */
+.sec-div {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .8px; color: var(--text3);
+  display: flex; align-items: center; gap: 12px;
+  margin: 28px 0 16px;
+}
+.sec-div::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ── TABLE ── */
+.tbl-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.tbl-head {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.tbl-head h3 { font-size: 14px; font-weight: 700; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead th {
+  padding: 10px 16px; text-align: left;
+  font-size: 10px; font-weight: 700; letter-spacing: .5px;
+  text-transform: uppercase; color: var(--text3);
+  border-bottom: 1px solid var(--border); background: var(--bg2);
+}
+tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(255,255,255,.02); }
+tbody td { padding: 12px 16px; }
+td.r { text-align: right; font-family: var(--mono); font-size: 11px; }
+td.acc-g { color: var(--acc); font-weight: 600; }
+td.acc-b { color: var(--acc2); font-weight: 600; }
+td.acc-a { color: var(--acc3); font-weight: 600; }
+
+/* ── CONTENT BREAKDOWN ── */
+.breakdown-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.bk-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.bk-row:last-child { border-bottom: none; }
+.bk-lbl { font-size: 12px; color: var(--text2); }
+.bk-val { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+.bk-sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+/* ── ESTRUTURA ── */
+.camp-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 22px;
+}
+.camp-header {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
+  padding-bottom: 16px; border-bottom: 1px solid var(--border);
+}
+.camp-status {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--acc); flex-shrink: 0;
+  box-shadow: 0 0 8px var(--acc);
+}
+.camp-name { font-size: 15px; font-weight: 700; }
+.camp-obj { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.camp-badge {
+  margin-left: auto; padding: 4px 12px; border-radius: 6px;
+  font-size: 10px; font-weight: 700; letter-spacing: .4px;
+  background: rgba(0,229,160,.12); color: var(--acc);
+  border: 1px solid rgba(0,229,160,.2);
+}
+
+.conj-row {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 14px 16px; margin-bottom: 10px;
+}
+.conj-name { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+.conj-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag {
+  font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px;
+}
+.tag.b { background: rgba(14,165,233,.12); color: var(--acc2); }
+.tag.g { background: rgba(0,229,160,.12); color: var(--acc); }
+.tag.a { background: rgba(245,158,11,.12); color: var(--acc3); }
+
+/* ── INPUT FIELDS ── */
+.input-group {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.input-group h3 { font-size: 14px; font-weight: 700; margin-bottom: 16px; color: var(--text2); }
+.inp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+.inp-field label { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 5px; }
+.inp-field input {
+  width: 100%; background: var(--bg2);
+  border: 1px solid var(--border2); border-radius: 8px;
+  padding: 9px 12px; font-family: var(--mono); font-size: 13px;
+  color: var(--text); outline: none; transition: border-color .2s;
+}
+.inp-field input:focus { border-color: var(--acc); }
+.btn-save {
+  background: var(--acc); color: #0a0e17;
+  font-family: var(--head); font-weight: 700; font-size: 13px;
+  padding: 10px 24px; border-radius: 8px; border: none;
+  cursor: pointer; transition: opacity .2s;
+}
+.btn-save:hover { opacity: .85; }
+
+/* ── LOGO AREA ── */
+.powered {
+  font-size: 9px; color: var(--text3); letter-spacing: .6px;
+  text-transform: uppercase; margin-top: 6px;
+}
+.powered strong { color: var(--acc); }
+
+
+/* ── BREAKDOWN CARD ── */
+.breakdown-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 22px;
+  transition: border-color .2s;
+}
+.breakdown-card:hover { border-color: var(--border2); }
+
+.bk-card-header {
+  display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px;
+}
+.bk-card-icon {
+  width: 38px; height: 38px; border-radius: 10px; flex-shrink:0;
+  display: flex; align-items: center; justify-content: center; font-size: 17px;
+}
+.bk-card-icon.b  { background: rgba(14,165,233,.15); }
+.bk-card-icon.a2 { background: rgba(245,158,11,.15); }
+
+.bk-card-lbl { font-size: 12px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; }
+.bk-card-total {
+  font-family: var(--mono); font-size: 28px; font-weight: 800;
+  color: var(--text); margin-left: auto; white-space: nowrap;
+}
+
+.bk-divider { height: 1px; background: var(--border); margin-bottom: 14px; }
+
+.bk-row-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.bk-row-item:last-of-type { border-bottom: none; }
+.bk-row-left { display: flex; align-items: center; gap: 12px; }
+.bk-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+.bk-dot.g { background: var(--acc); }
+.bk-dot.a { background: var(--acc3); }
+.bk-dot.b { background: var(--acc2); }
+
+.bk-row-lbl { font-size: 13px; font-weight: 600; color: var(--text); }
+.bk-row-sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+.bk-row-right { text-align: right; }
+.bk-row-val { font-family: var(--mono); font-size: 18px; font-weight: 700; }
+.bk-row-val.g { color: var(--acc); }
+.bk-row-val.a { color: var(--acc3); }
+.bk-row-val.b { color: var(--acc2); }
+
+.bk-row-pct {
+  font-size: 11px; font-weight: 600; margin-top: 2px;
+  padding: 2px 8px; border-radius: 20px; display: inline-block;
+}
+.bk-row-pct.g { background: rgba(0,229,160,.1); color: var(--acc); }
+.bk-row-pct.a { background: rgba(245,158,11,.1); color: var(--acc3); }
+.bk-row-pct.b { background: rgba(14,165,233,.1); color: var(--acc2); }
+
+.bk-prog-wrap {
+  display: flex; height: 6px; border-radius: 3px; overflow: hidden;
+  background: rgba(255,255,255,.05); margin-top: 14px;
+}
+.bk-prog-seg {
+  height: 100%; transition: width 1s cubic-bezier(.4,0,.2,1);
+}
+.bk-prog-seg.g { background: var(--acc); }
+.bk-prog-seg.a { background: var(--acc3); }
+
+/* ── RESPONSIVE ── */
+@media(max-width:1100px) { .g4{grid-template-columns:repeat(2,1fr)} .g5{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:800px) {
+  aside{display:none}
+  main{margin-left:0}
+  .g5,.g4,.g3,.g2,.g2-1,.g1-2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside>
+  <div class="sidebar-logo">
+    <div class="brand">
+      <div class="logo-dot">A</div>
+      <div>
+        <div class="brand-name">Avant Ads</div>
+      </div>
+    </div>
+    <div class="powered">Analytics <strong>1.0</strong></div>
+  </div>
+
+  <div class="sidebar-client">
+    <div class="lbl">Cliente</div>
+    <div class="cli-name" id="sb-client">— configure →</div>
+    <div class="cli-period" id="sb-period">Período não definido</div>
+  </div>
+
+  <div class="sidebar-nav">
+    <div class="nav-lbl">Menu</div>
+    <div class="nav-item active" onclick="goTab('visao')">
+      <span class="ni">◈</span> Visão Geral
+    </div>
+    <div class="nav-item" onclick="goTab('trafego')">
+      <span class="ni">⬡</span> Tráfego Pago
+    </div>
+    <div class="nav-item" onclick="goTab('perfil')">
+      <span class="ni">◉</span> Números do Perfil
+    </div>
+    <div class="nav-item" onclick="goTab('conteudo')">
+      <span class="ni">◧</span> Visão do Conteúdo
+    </div>
+    <div class="nav-item" onclick="goTab('estrutura')">
+      <span class="ni">⬢</span> Estrutura Campanha
+    </div>
+    <div class="nav-item" onclick="goTab('config')">
+      <span class="ni">◎</span> Configurar Dados
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    Gerado por <strong>Avant Ads</strong><br>
+    <span id="sb-date"></span>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main>
+  <div class="topbar">
+    <div class="topbar-title" id="tb-title">Visão Geral <span id="tb-sub">Relatório de Performance</span></div>
+    <div class="period-badge">
+      <div class="period-dot"></div>
+      <strong id="tb-period">—</strong>
+    </div>
+  </div>
+
+  <!-- ══ VISÃO GERAL ══ -->
+  <div class="section active" id="sec-visao">
+    <div class="sec-header">
+      <h2>Visão Geral</h2>
+      <p>Resumo consolidado da performance do período</p>
+    </div>
+
+    <!-- KPIs Tráfego Pago -->
+    <div class="sec-div">Tráfego Pago</div>
+    <div class="card-grid g5">
+      <div class="metric-card c-green">
+        <div class="mc-icon g">💰</div>
+        <div class="mc-lbl">Investimento Bruto</div>
+        <div class="mc-val w" id="vg-invest-bruto">R$ —</div>
+        <div class="mc-sub">Anúncios Meta + Impostos</div>
+      </div>
+      <div class="metric-card c-green">
+        <div class="mc-icon g">💰</div>
+        <div class="mc-lbl">Investimento Líquido</div>
+        <div class="mc-val w" id="vg-invest">R$ —</div>
+        <div class="mc-sub">Anúncios Meta</div>
+      </div>
+      <div class="metric-card c-blue">
+        <div class="mc-icon b">👁️</div>
+        <div class="mc-lbl">Alcance Pago</div>
+        <div class="mc-val b" id="vg-alcance">—</div>
+        <div class="mc-sub">Pessoas únicas alcançadas</div>
+      </div>
+      <div class="metric-card c-amber">
+        <div class="mc-icon a">📊</div>
+        <div class="mc-lbl">CPM</div>
+        <div class="mc-val a" id="vg-cpm">R$ —</div>
+        <div class="mc-sub">Custo por mil impressões</div>
+      </div>
+      <div class="metric-card c-green">
+        <div class="mc-icon g">👤</div>
+        <div class="mc-lbl">Visitas ao Perfil</div>
+        <div class="mc-val g" id="vg-visitas">—</div>
+        <div class="mc-sub" id="vg-cpv-sub">CPV: R$ —</div>
+      </div>
+    </div>
+
+    <div class="card-grid g4">
+      <div class="metric-card c-blue">
+        <div class="mc-icon b">🔁</div>
+        <div class="mc-lbl">Impressões</div>
+        <div class="mc-val b" id="vg-impressoes">—</div>
+        <div class="mc-sub">Total de exibições</div>
+      </div>
+      <div class="metric-card c-green">
+        <div class="mc-icon g">➕</div>
+        <div class="mc-lbl">Novos Seguidores</div>
+        <div class="mc-val g" id="vg-seguidores">—</div>
+        <div class="mc-sub" id="vg-cps-sub">CPS: R$ —</div>
+      </div>
+      <div class="metric-card c-amber">
+        <div class="mc-icon a">🎯</div>
+        <div class="mc-lbl">Custo / Visita Perfil</div>
+        <div class="mc-val a" id="vg-cpv">R$ —</div>
+        <div class="mc-sub">Eficiência da campanha</div>
+      </div>
+      <div class="metric-card c-red">
+        <div class="mc-icon r">💸</div>
+        <div class="mc-lbl">Custo / Seguidor</div>
+        <div class="mc-val r" id="vg-cps">R$ —</div>
+        <div class="mc-sub">Custo por novo seguidor</div>
+      </div>
+    </div>
+
+    <!-- Breakdown Alcance e Visualizações -->
+    <div class="sec-div">Números Gerais do Perfil</div>
+    <div class="card-grid g2">
+
+      <!-- ALCANCE -->
+      <div class="breakdown-card">
+        <div class="bk-card-header">
+          <div class="bk-card-icon b">🌐</div>
+          <div style="flex:1">
+            <div class="bk-card-lbl">Alcance Total</div>
+            <div class="mc-delta nt" id="vg-alc-d" style="margin-top:4px">—</div>
+          </div>
+          <div class="bk-card-total" id="vg-alc-total">—</div>
+        </div>
+        <div class="bk-divider"></div>
+        <div class="bk-row-item">
+          <div class="bk-row-left">
+            <span class="bk-dot g"></span>
+            <div>
+              <div class="bk-row-lbl">Orgânico</div>
+              <div class="bk-row-sub">Sem investimento</div>
+            </div>
+          </div>
+          <div class="bk-row-right">
+            <div class="bk-row-val g" id="vg-alc-org">—</div>
+            <div class="bk-row-pct g" id="vg-alc-org-pct">—%</div>
+          </div>
+        </div>
+        <div class="bk-row-item">
+          <div class="bk-row-left">
+            <span class="bk-dot a"></span>
+            <div>
+              <div class="bk-row-lbl">Pago (Anúncios)</div>
+              <div class="bk-row-sub">Via tráfego pago</div>
+            </div>
+          </div>
+          <div class="bk-row-right">
+            <div class="bk-row-val a" id="vg-alc-ads">—</div>
+            <div class="bk-row-pct a" id="vg-alc-ads-pct">—%</div>
+          </div>
+        </div>
+        <div class="bk-prog-wrap">
+          <div class="bk-prog-seg g" id="bk-alc-org-bar" style="width:0%"></div>
+          <div class="bk-prog-seg a" id="bk-alc-ads-bar" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- VISUALIZAÇÕES -->
+      <div class="breakdown-card">
+        <div class="bk-card-header">
+          <div class="bk-card-icon a2">▶️</div>
+          <div style="flex:1">
+            <div class="bk-card-lbl">Visualizações Totais</div>
+            <div class="mc-delta nt" id="vg-viz-d" style="margin-top:4px">—</div>
+          </div>
+          <div class="bk-card-total" id="vg-viz">—</div>
+        </div>
+        <div class="bk-divider"></div>
+        <div class="bk-row-item">
+          <div class="bk-row-left">
+            <span class="bk-dot g"></span>
+            <div>
+              <div class="bk-row-lbl">Orgânico</div>
+              <div class="bk-row-sub">Conteúdo sem impulsionamento</div>
+            </div>
+          </div>
+          <div class="bk-row-right">
+            <div class="bk-row-val g" id="vg-viz-org">—</div>
+            <div class="bk-row-pct g" id="vg-viz-org-pct">—%</div>
+          </div>
+        </div>
+        <div class="bk-row-item">
+          <div class="bk-row-left">
+            <span class="bk-dot a"></span>
+            <div>
+              <div class="bk-row-lbl">Pago (Anúncios)</div>
+              <div class="bk-row-sub">Via campanhas Meta Ads</div>
+            </div>
+          </div>
+          <div class="bk-row-right">
+            <div class="bk-row-val a" id="vg-viz-ads">—</div>
+            <div class="bk-row-pct a" id="vg-viz-ads-pct">—%</div>
+          </div>
+        </div>
+        <div class="bk-prog-wrap">
+          <div class="bk-prog-seg g" id="bk-viz-org-bar" style="width:0%"></div>
+          <div class="bk-prog-seg a" id="bk-viz-ads-bar" style="width:0%"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="card-grid g2" style="margin-top:0">
+      <div class="metric-card c-amber">
+        <div class="mc-icon a">🏠</div>
+        <div class="mc-lbl">Visitas ao Perfil</div>
+        <div class="mc-val a" id="vg-vis-total">—</div>
+        <div class="mc-delta nt" id="vg-vis-d">— vs período anterior</div>
+      </div>
+      <div class="metric-card c-green">
+        <div class="mc-icon g">⭐</div>
+        <div class="mc-lbl">Novos Seguidores</div>
+        <div class="mc-val g" id="vg-seg-total">—</div>
+        <div class="mc-delta nt" id="vg-seg-d">— vs período anterior</div>
+      </div>
+    </div>
+
+    <!-- Análise de Performance -->
+    <div class="sec-div">Análise de Performance</div>
+    <div class="card-grid g2-1">
+      <div class="pvx-card">
+        <div class="pvx-header"><div class="pvx-dot"></div> Planejado vs Executado</div>
+
+        <div class="pvx-row">
+          <div class="pvx-row-head">
+            <span class="pvx-label">Custo por Visita ao Perfil</span>
+            <div>
+              <span class="pvx-vals" id="pvx-cpv">R$ —</span>
+              <span class="pvx-meta" id="pvx-cpv-meta"> / Meta: R$ —</span>
+            </div>
+          </div>
+          <div class="prog-bar"><div class="prog-fill b" id="pb-cpv" style="width:0%"></div></div>
+          <div><span class="status-pill" id="pill-cpv">—</span></div>
+        </div>
+
+        <div class="pvx-row">
+          <div class="pvx-row-head">
+            <span class="pvx-label">Custo por Seguidor</span>
+            <div>
+              <span class="pvx-vals" id="pvx-cps">R$ —</span>
+              <span class="pvx-meta" id="pvx-cps-meta"> / Meta: R$ —</span>
+            </div>
+          </div>
+          <div class="prog-bar"><div class="prog-fill g" id="pb-cps" style="width:0%"></div></div>
+          <div><span class="status-pill" id="pill-cps">—</span></div>
+        </div>
+
+        <div class="pvx-row">
+          <div class="pvx-row-head">
+            <span class="pvx-label">Visitas ao Perfil</span>
+            <div>
+              <span class="pvx-vals" id="pvx-vis">—</span>
+              <span class="pvx-meta" id="pvx-vis-meta"> / Meta: —</span>
+            </div>
+          </div>
+          <div class="prog-bar"><div class="prog-fill a" id="pb-vis" style="width:0%"></div></div>
+          <div><span class="status-pill" id="pill-vis">—</span></div>
+        </div>
+
+        <div class="pvx-row">
+          <div class="pvx-row-head">
+            <span class="pvx-label">Novos Seguidores</span>
+            <div>
+              <span class="pvx-vals" id="pvx-seg">—</span>
+              <span class="pvx-meta" id="pvx-seg-meta"> / Meta: —</span>
+            </div>
+          </div>
+          <div class="prog-bar"><div class="prog-fill g" id="pb-seg" style="width:0%"></div></div>
+          <div><span class="status-pill" id="pill-seg">—</span></div>
+        </div>
+
+        <div class="pvx-row">
+          <div class="pvx-row-head">
+            <span class="pvx-label">Investimento</span>
+            <div>
+              <span class="pvx-vals" id="pvx-inv">R$ —</span>
+              <span class="pvx-meta" id="pvx-inv-meta"> / Orçamento: R$ —</span>
+            </div>
+          </div>
+          <div class="prog-bar"><div class="prog-fill r" id="pb-inv" style="width:0%"></div></div>
+          <div><span class="status-pill" id="pill-inv">—</span></div>
+        </div>
+      </div>
+
+      <div class="proj-card">
+        <h3>⟳ Projeção com verba restante</h3>
+        <div class="proj-row"><span class="lbl">Verba restante</span><span class="val" id="pj-restante">R$ —</span></div>
+        <div class="proj-row"><span class="lbl">CPV atual</span><span class="val" id="pj-cpv">R$ —</span></div>
+        <div class="proj-row"><span class="lbl">CPS atual</span><span class="val" id="pj-cps">R$ —</span></div>
+        <div class="proj-row"><span class="lbl">Visitas estimadas restantes</span><span class="val" id="pj-vis-est" style="color:var(--acc2)">+ —</span></div>
+        <div class="proj-row"><span class="lbl">Seguidores estimados rest.</span><span class="val" id="pj-seg-est" style="color:var(--acc2)">+ —</span></div>
+        <div class="proj-row"><span class="lbl">Total visitas estimado</span><span class="val big" id="pj-vis-total">—</span></div>
+        <div class="proj-row"><span class="lbl">Total seguidores estimado</span><span class="val big" id="pj-seg-total" style="color:var(--acc2)">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TRÁFEGO PAGO ══ -->
+  <div class="section" id="sec-trafego">
+    <div class="sec-header">
+      <h2>Tráfego Pago</h2>
+      <p>Métricas detalhadas da campanha de distribuição de conteúdo</p>
+    </div>
+
+    <div class="card-grid g4">
+      <div class="metric-card c-green">
+        <div class="mc-icon g">💰</div>
+        <div class="mc-lbl">Investimento Total</div>
+        <div class="mc-val w" id="tp-invest">R$ —</div>
+        <div class="mc-sub">Meta Ads</div>
+      </div>
+      <div class="metric-card c-blue">
+        <div class="mc-icon b">👁️</div>
+        <div class="mc-lbl">Alcance</div>
+        <div class="mc-val b" id="tp-alcance">—</div>
+        <div class="mc-sub">Pessoas únicas</div>
+      </div>
+      <div class="metric-card c-amber">
+        <div class="mc-icon a">🔁</div>
+        <div class="mc-lbl">Impressões</div>
+        <div class="mc-val a" id="tp-impressoes">—</div>
+        <div class="mc-sub">Total de exibições</div>
+      </div>
+      <div class="metric-card c-red">
+        <div class="mc-icon r">📊</div>
+        <div class="mc-lbl">CPM</div>
+        <div class="mc-val r" id="tp-cpm">R$ —</div>
+        <div class="mc-sub">Custo por mil impressões</div>
+      </div>
+    </div>
+
+    <div class="card-grid g4">
+      <div class="metric-card c-green">
+        <div class="mc-icon g">👤</div>
+        <div class="mc-lbl">Visitas ao Perfil</div>
+        <div class="mc-val g" id="tp-visitas">—</div>
+        <div class="mc-sub">Via anúncios pagos</div>
+      </div>
+      <div class="metric-card c-blue">
+        <div class="mc-icon b">🎯</div>
+        <div class="mc-lbl">Custo / Visita Perfil</div>
+        <div class="mc-val b" id="tp-cpv">R$ —</div>
+        <div class="mc-sub">Eficiência da campanha</div>
+      </div>
+      <div class="metric-card c-green">
+        <div class="mc-icon g">➕</div>
+        <div class="mc-lbl">Novos Seguidores</div>
+        <div class="mc-val g" id="tp-seg">—</div>
+        <div class="mc-sub">Atribuídos à campanha</div>
+      </div>
+      <div class="metric-card c-amber">
+        <div class="mc-icon a">💸</div>
+        <div class="mc-lbl">Custo / Seguidor</div>
+        <div class="mc-val a" id="tp-cps">R$ —</div>
+        <div class="mc-sub">Custo por novo seguidor</div>
+      </div>
+    </div>
+
+    <div class="sec-div">Análise de distribuição de verba</div>
+    <div class="card-grid g2">
+      <div class="chart-card">
+        <h3>Alcance vs Impressões</h3>
+        <div class="chart-sub">Frequência média de exibição por pessoa</div>
+        <div class="chart-wrap h200"><canvas id="chart-alc-imp"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Visitas vs Seguidores</h3>
+        <div class="chart-sub">Taxa de conversão visita → seguidor</div>
+        <div class="chart-wrap h200"><canvas id="chart-vis-seg"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PERFIL ══ -->
+  <div class="section" id="sec-perfil">
+    <div class="sec-header">
+      <h2>Números Gerais do Perfil</h2>
+      <p>Performance orgânica + paga consolidada da conta</p>
+    </div>
+
+    <div class="card-grid g4">
+      <div class="metric-card c-blue">
+        <div class="mc-icon b">▶️</div>
+        <div class="mc-lbl">Visualizações</div>
+        <div class="mc-val b" id="pf-viz">—</div>
+        <div class="mc-delta" id="pf-viz-d">—</div>
+      </div>
+      <div class="metric-card c-green">
+        <div class="mc-icon g">🌐</div>
+        <div class="mc-lbl">Alcance Total</div>
+        <div class="mc-val g" id="pf-alc">—</div>
+        <div class="mc-delta" id="pf-alc-d">—</div>
+      </div>
+      <div class="metric-card c-amber">
+        <div class="mc-icon a">🏠</div>
+        <div class="mc-lbl">Visitas ao Perfil</div>
+        <div class="mc-val a" id="pf-vis">—</div>
+        <div class="mc-delta" id="pf-vis-d">—</div>
+      </div>
+      <div class="metric-card c-green">
+        <div class="mc-icon g">⭐</div>
+        <div class="mc-lbl">Novos Seguidores</div>
+        <div class="mc-val g" id="pf-seg">—</div>
+        <div class="mc-delta" id="pf-seg-d">—</div>
+      </div>
+    </div>
+
+    <div class="sec-div">Interações do Período</div>
+    <div class="card-grid g3">
+      <div class="metric-card c-blue">
+        <div class="mc-icon b">❤️</div>
+        <div class="mc-lbl">Interações com Conteúdo</div>
+        <div class="mc-val b" id="pf-int">—</div>
+        <div class="mc-delta" id="pf-int-d">—</div>
+      </div>
+      <div class="metric-card c-amber">
+        <div class="mc-icon a">🔗</div>
+        <div class="mc-lbl">Cliques no Link</div>
+        <div class="mc-val a" id="pf-clk">—</div>
+        <div class="mc-sub">Link na bio</div>
+      </div>
+      <div class="metric-card c-green">
+        <div class="mc-icon g">📈</div>
+        <div class="mc-lbl">Taxa de Engajamento</div>
+        <div class="mc-val g" id="pf-eng">—</div>
+        <div class="mc-sub">Interações / Alcance</div>
+      </div>
+    </div>
+
+    <div class="card-grid g2">
+      <div class="chart-card">
+        <h3>Evolução do Alcance</h3>
+        <div class="chart-sub">Crescimento ao longo do período</div>
+        <div class="chart-wrap h260"><canvas id="chart-pf-alc"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Evolução dos Seguidores</h3>
+        <div class="chart-sub">Novos seguidores por semana</div>
+        <div class="chart-wrap h260"><canvas id="chart-pf-seg"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CONTEÚDO ══ -->
+  <div class="section" id="sec-conteudo">
+    <div class="sec-header">
+      <h2>Visão Geral do Conteúdo</h2>
+      <p>Performance por tipo de conteúdo — orgânico vs anúncios</p>
+    </div>
+
+    <div class="sec-div">Visualizações</div>
+    <div class="card-grid g3">
+      <div class="metric-card c-blue">
+        <div class="mc-icon b">📺</div>
+        <div class="mc-lbl">Total Visualizações</div>
+        <div class="mc-val b" id="ct-viz-total">—</div>
+        <div class="mc-delta up" id="ct-viz-d">—</div>
+      </div>
+      <div class="metric-card c-green">
+        <div class="mc-icon g">🌿</div>
+        <div class="mc-lbl">De Orgânico</div>
+        <div class="mc-val g" id="ct-viz-org">—</div>
+        <div class="mc-delta up" id="ct-viz-org-d">—</div>
+      </div>
+      <div class="metric-card c-amber">
+        <div class="mc-icon a">📢</div>
+        <div class="mc-lbl">De Anúncios</div>
+        <div class="mc-val a" id="ct-viz-ads">—</div>
+        <div class="mc-delta up" id="ct-viz-ads-d">—</div>
+      </div>
+    </div>
+
+    <div class="sec-div">Alcance</div>
+    <div class="card-grid g3">
+      <div class="metric-card c-blue">
+        <div class="mc-icon b">🌐</div>
+        <div class="mc-lbl">Alcance Total</div>
+        <div class="mc-val b" id="ct-alc-total">—</div>
+        <div class="mc-delta up" id="ct-alc-d">—</div>
+      </div>
+      <div class="metric-card c-green">
+        <div class="mc-icon g">🌿</div>
+        <div class="mc-lbl">Alcance Orgânico</div>
+        <div class="mc-val g" id="ct-alc-org">—</div>
+        <div class="mc-sub">Sem investimento</div>
+      </div>
+      <div class="metric-card c-amber">
+        <div class="mc-icon a">📢</div>
+        <div class="mc-lbl">Alcance de Anúncios</div>
+        <div class="mc-val a" id="ct-alc-ads">—</div>
+        <div class="mc-sub">Via tráfego pago</div>
+      </div>
+    </div>
+
+    <div class="sec-div">Distribuição</div>
+    <div class="card-grid g2">
+      <div class="chart-card">
+        <h3>Visualizações: Orgânico vs Anúncios</h3>
+        <div class="chart-sub">Participação por origem</div>
+        <div class="chart-wrap h200"><canvas id="chart-ct-viz"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Alcance: Orgânico vs Anúncios</h3>
+        <div class="chart-sub">Participação por origem</div>
+        <div class="chart-wrap h200"><canvas id="chart-ct-alc"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ESTRUTURA ══ -->
+  <div class="section" id="sec-estrutura">
+    <div class="sec-header">
+      <h2>Estrutura da Campanha</h2>
+      <p>Configuração ativa de campanhas e conjuntos de anúncios</p>
+    </div>
+
+    <div class="camp-card" style="margin-bottom:16px">
+      <div class="camp-header">
+        <div class="camp-status"></div>
+        <div>
+          <div class="camp-name" id="est-camp-nome">Nome da Campanha</div>
+          <div class="camp-obj" id="est-camp-obj">Objetivo: Distribuição de Conteúdo / Visitas ao Perfil</div>
+        </div>
+        <span class="camp-badge">ATIVA</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:20px">
+        <div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Orçamento</div>
+          <div style="font-size:15px;font-weight:700" id="est-orcamento">R$ —</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Período</div>
+          <div style="font-size:15px;font-weight:700" id="est-periodo">—</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Plataforma</div>
+          <div style="font-size:15px;font-weight:700">Instagram</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Status</div>
+          <div style="font-size:15px;font-weight:700;color:var(--acc)">Ativa</div>
+        </div>
+      </div>
+
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">Conjuntos de Anúncios</div>
+
+      <div class="conj-row">
+        <div class="conj-name" id="est-conj1">Conjunto 1 — Público Frio</div>
+        <div class="conj-tags">
+          <span class="tag b">📍 Localização: <span id="est-loc1">—</span></span>
+          <span class="tag a">👥 Idade: <span id="est-idade1">—</span></span>
+          <span class="tag g">🎯 Interesse: <span id="est-int1">—</span></span>
+        </div>
+      </div>
+
+      <div class="conj-row" id="conj2-row" style="display:none">
+        <div class="conj-name" id="est-conj2">Conjunto 2</div>
+        <div class="conj-tags">
+          <span class="tag b">📍 Localização: <span id="est-loc2">—</span></span>
+          <span class="tag a">👥 Idade: <span id="est-idade2">—</span></span>
+          <span class="tag g">🎯 Interesse: <span id="est-int2">—</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tbl-card">
+      <div class="tbl-head"><h3>Anúncios Ativos</h3></div>
+      <table>
+        <thead>
+          <tr>
+            <th>Anúncio</th>
+            <th>Formato</th>
+            <th class="r">Alcance</th>
+            <th class="r">Impressões</th>
+            <th class="r">Visitas Perfil</th>
+            <th class="r">Seguidores</th>
+            <th class="r">CPV</th>
+          </tr>
+        </thead>
+        <tbody id="est-anuncios">
+          <tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px">Configure os dados na aba Configurar Dados</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ CONFIG ══ -->
+  <div class="section" id="sec-config">
+    <div class="sec-header">
+      <h2>Configurar Dados</h2>
+      <p>Preencha os dados do período para gerar o relatório completo</p>
+    </div>
+
+    <!-- INFO GERAL -->
+    <div class="input-group">
+      <h3>📋 Informações Gerais</h3>
+      <div class="inp-grid">
+        <div class="inp-field"><label>Nome do Cliente</label><input id="i-cliente" type="text" placeholder="Ex: Nacarati Semijoias"></div>
+        <div class="inp-field"><label>Período</label><input id="i-periodo" type="text" placeholder="Ex: Março/2025"></div>
+        <div class="inp-field"><label>Orçamento Total (R$)</label><input id="i-orcamento" type="number" placeholder="3700"></div>
+        <div class="inp-field"><label>Nome da Campanha</label><input id="i-camp-nome" type="text" placeholder="Ex: Distribuição de Conteúdo — Mar25"></div>
+      </div>
+    </div>
+
+    <!-- TRÁFEGO PAGO -->
+    <div class="input-group">
+      <h3>💰 Tráfego Pago (Meta Ads)</h3>
+      <div class="inp-grid">
+        <div class="inp-field"><label>Investimento Bruto (R$)</label><input id="i-invest-bruto" type="number" placeholder="0"></div>
+        <div class="inp-field"><label>Investimento Líquido (R$)</label><input id="i-invest" type="number" placeholder="0"></div>
+        <div class="inp-field"><label>Alcance</label><input id="i-alcance" type="number" placeholder="0"></div>
+        <div class="inp-field"><label>Impressões</label><input id="i-impressoes" type="number" placeholder="0"></div>
+        <div class="inp-field"><label>CPM (R$)</label><input id="i-cpm" type="number" placeholder="0" step="0.01"></div>
+        <div class="inp-field"><label>Visitas ao Perfil (via ads)</label><input id="i-visitas" type="number" placeholder="0"></div>
+        <div class="inp-field"><label>Novos Seguidores (via ads)</label><input id="i-seg-ads" type="number" placeholder="0"></div>
+      </div>
+    </div>
+
+    <!-- METAS -->
+    <div class="input-group">
+      <h3>🎯 Metas do Período</h3>
+      <div class="inp-grid">
+        <div class="inp-field"><label>Meta de Visitas ao Perfil</label><input id="m-visitas" type="number" placeholder="0"></div>
+        <div class="inp-field"><label>Meta de Novos Seguidores</label><input id="m-seg" type="number" placeholder="0"></div>
+        <div class="inp-field"><label>Meta CPV (R$)</label><input id="m-cpv" type="number" placeholder="0" step="0.01"></div>
+        <div class="inp-field"><label>Meta CPS (R$)</label><input id="m-cps" type="number" placeholder="0" step="0.01"></div>
+      </div>
+    </div>
+
+    <!-- NÚMEROS DO PERFIL -->
+    <div class="input-group">
+      <h3>📱 Números Gerais do Perfil (Business Suite)</h3>
+      <div class="inp-grid">
+        <div class="inp-field"><label>Visualizações Totais</label><input id="i-viz" type="number" placeholder="82300"></div>
+        <div class="inp-field"><label>Variação Visualizações (%)</label><input id="i-viz-d" type="number" placeholder="571.4" step="0.1"></div>
+        <div class="inp-field"><label>Alcance Total</label><input id="i-alc" type="number" placeholder="11600"></div>
+        <div class="inp-field"><label>Variação Alcance (%)</label><input id="i-alc-d" type="number" placeholder="389" step="0.1"></div>
+        <div class="inp-field"><label>Visitas ao Perfil (total)</label><input id="i-vis" type="number" placeholder="2700"></div>
+        <div class="inp-field"><label>Variação Visitas (%)</label><input id="i-vis-d" type="number" placeholder="289.7" step="0.1"></div>
+        <div class="inp-field"><label>Novos Seguidores (total)</label><input id="i-seg" type="number" placeholder="405"></div>
+        <div class="inp-field"><label>Variação Seguidores (%)</label><input id="i-seg-d" type="number" placeholder="206.8" step="0.1"></div>
+        <div class="inp-field"><label>Interações com Conteúdo</label><input id="i-int" type="number" placeholder="1100"></div>
+        <div class="inp-field"><label>Variação Interações (%)</label><input id="i-int-d" type="number" placeholder="3700" step="0.1"></div>
+        <div class="inp-field"><label>Cliques no Link</label><input id="i-clk" type="number" placeholder="0"></div>
+      </div>
+    </div>
+
+    <!-- VISÃO DO CONTEÚDO -->
+    <div class="input-group">
+      <h3>🎬 Visão Geral do Conteúdo</h3>
+      <div class="inp-grid">
+        <div class="inp-field"><label>Visualizações — Orgânico</label><input id="i-viz-org" type="number" placeholder="79315"></div>
+        <div class="inp-field"><label>Variação Viz. Orgânico (%)</label><input id="i-viz-org-d" type="number" placeholder="547.5" step="0.1"></div>
+        <div class="inp-field"><label>Visualizações — Anúncios</label><input id="i-viz-ads" type="number" placeholder="3019"></div>
+        <div class="inp-field"><label>Variação Viz. Anúncios (%)</label><input id="i-viz-ads-d" type="number" placeholder="23100" step="0.1"></div>
+        <div class="inp-field"><label>Alcance — Orgânico</label><input id="i-alc-org" type="number" placeholder="0"></div>
+        <div class="inp-field"><label>Alcance — Anúncios</label><input id="i-alc-ads" type="number" placeholder="0"></div>
+      </div>
+    </div>
+
+    <!-- ESTRUTURA -->
+    <div class="input-group">
+      <h3>🏗️ Estrutura da Campanha</h3>
+      <div class="inp-grid">
+        <div class="inp-field"><label>Objetivo da Campanha</label><input id="i-obj" type="text" placeholder="Visitas ao perfil / Seguidores"></div>
+        <div class="inp-field"><label>Localização (Conjunto 1)</label><input id="i-loc1" type="text" placeholder="Ex: Manhuaçu e região"></div>
+        <div class="inp-field"><label>Faixa Etária (Conjunto 1)</label><input id="i-idade1" type="text" placeholder="Ex: 25–55 anos"></div>
+        <div class="inp-field"><label>Interesses (Conjunto 1)</label><input id="i-int1" type="text" placeholder="Ex: Moda, Acessórios"></div>
+      </div>
+    </div>
+
+    <button class="btn-save" onclick="saveData()">✓ Gerar Relatório</button>
+  </div>
+
+</main>
+
+<script>
+// ══════════════════════
+// STATE
+// ══════════════════════
+let D = {};
+let charts = {};
+
+// DATE
+document.getElementById('sb-date').textContent = new Date().toLocaleDateString('pt-BR', {day:'2-digit',month:'short',year:'numeric'});
+
+// ══════════════════════
+// NAV
+// ══════════════════════
+const tabMap = {
+  visao:    { sec:'sec-visao',    title:'Visão Geral',              sub:'Resumo consolidado de performance' },
+  trafego:  { sec:'sec-trafego',  title:'Tráfego Pago',             sub:'Meta Ads — Campanha de Conteúdo'  },
+  perfil:   { sec:'sec-perfil',   title:'Números do Perfil',        sub:'Business Suite — Conta Instagram' },
+  conteudo: { sec:'sec-conteudo', title:'Visão Geral do Conteúdo',  sub:'Orgânico vs Anúncios'             },
+  estrutura:{ sec:'sec-estrutura',title:'Estrutura da Campanha',    sub:'Configuração ativa'               },
+  config:   { sec:'sec-config',   title:'Configurar Dados',         sub:'Preencha os valores do período'   },
+};
+
+function goTab(tab) {
+  const navItems = document.querySelectorAll('.nav-item');
+  const tabKeys = ['visao','trafego','perfil','conteudo','estrutura','config'];
+  navItems.forEach((n, i) => n.classList.toggle('active', tabKeys[i] === tab));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(tabMap[tab].sec).classList.add('active');
+  document.getElementById('tb-title').innerHTML = tabMap[tab].title + ` <span>${tabMap[tab].sub}</span>`;
+  Object.values(charts).forEach(c => c?.destroy?.());
+  charts = {};
+  setTimeout(() => renderCharts(tab), 50);
+}
+
+// ══════════════════════
+// SAVE & RENDER
+// ══════════════════════
+function saveData() {
+  const g = id => parseFloat(document.getElementById(id)?.value) || 0;
+  const s = id => document.getElementById(id)?.value?.trim() || '';
+
+  D = {
+    cliente:   s('i-cliente'),
+    periodo:   s('i-periodo'),
+    orcamento: g('i-orcamento'),
+    campNome:  s('i-camp-nome'),
+    obj:       s('i-obj'),
+    loc1:      s('i-loc1'),
+    idade1:    s('i-idade1'),
+    int1:      s('i-int1'),
+
+    investBruto: g('i-invest-bruto'),
+    invest:      g('i-invest'),
+    alcance:   g('i-alcance'),
+    impressoes:g('i-impressoes'),
+    cpm:       g('i-cpm'),
+    visitas:   g('i-visitas'),
+    segAds:    g('i-seg-ads'),
+
+    mVis:      g('m-visitas'),
+    mSeg:      g('m-seg'),
+    mCpv:      g('m-cpv'),
+    mCps:      g('m-cps'),
+
+    viz:       g('i-viz'),    vizD:  g('i-viz-d'),
+    alc:       g('i-alc'),    alcD:  g('i-alc-d'),
+    vis:       g('i-vis'),    visD:  g('i-vis-d'),
+    seg:       g('i-seg'),    segD:  g('i-seg-d'),
+    intCont:   g('i-int'),    intD:  g('i-int-d'),
+    clk:       g('i-clk'),
+
+    vizOrg:    g('i-viz-org'),   vizOrgD: g('i-viz-org-d'),
+    vizAds:    g('i-viz-ads'),   vizAdsD: g('i-viz-ads-d'),
+    alcOrg:    g('i-alc-org'),
+    alcAds:    g('i-alc-ads'),
+  };
+
+  D.cpv = D.visitas > 0 ? D.invest / D.visitas : 0;
+  D.cps = D.segAds > 0 ? D.invest / D.segAds : 0;
+  D.restante = D.orcamento - D.invest;
+  D.visEstRest = D.cpv > 0 ? Math.round(D.restante / D.cpv) : 0;
+  D.segEstRest = D.cps > 0 ? Math.round(D.restante / D.cps) : 0;
+  D.eng = D.alc > 0 ? (D.intCont / D.alc * 100) : 0;
+
+  updateDOM();
+  renderCharts('visao');
+  goTabDirect('visao');
+}
+
+function goTabDirect(tab) {
+  document.querySelectorAll('.nav-item').forEach((n,i) => {
+    const tabs = ['visao','trafego','perfil','conteudo','estrutura','config'];
+    n.classList.toggle('active', tabs[i] === tab);
+  });
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(tabMap[tab].sec).classList.add('active');
+  document.getElementById('tb-title').innerHTML = tabMap[tab].title + ` <span>${tabMap[tab].sub}</span>`;
+}
+
+function updateDOM() {
+  // sidebar
+  document.getElementById('sb-client').textContent  = D.cliente  || '—';
+  document.getElementById('sb-period').textContent  = D.periodo  || '—';
+  document.getElementById('tb-period').textContent  = D.periodo  || '—';
+
+  // Visão Geral — tráfego pago
+  set('vg-invest-bruto', brl(D.investBruto));
+  set('vg-invest',    brl(D.invest));
+  set('vg-alcance',   num(D.alcance));
+  set('vg-cpm',       brl(D.cpm));
+  set('vg-visitas',   num(D.visitas));
+  set('vg-cpv-sub',   `CPV: ${brl(D.cpv)}`);
+  set('vg-impressoes',num(D.impressoes));
+  set('vg-seguidores',num(D.segAds));
+  set('vg-cps-sub',   `CPS: ${brl(D.cps)}`);
+  set('vg-cpv',       brl(D.cpv));
+  set('vg-cps',       brl(D.cps));
+
+  // Visão Geral — perfil breakdown
+  const vizTotal = (D.vizOrg + D.vizAds) || D.viz;
+  const alcTotal = (D.alcOrg + D.alcAds) || D.alc;
+
+  set('vg-viz',     numK(vizTotal));
+  set('vg-alc-total', numK(alcTotal));
+  set('vg-vis-total', numK(D.vis));
+  set('vg-seg-total', num(D.seg));
+  delta('vg-viz-d', D.vizD);
+  delta('vg-alc-d', D.alcD);
+  delta('vg-vis-d', D.visD);
+  delta('vg-seg-d', D.segD);
+
+  // Breakdown Visualizações
+  const vizOrg  = D.vizOrg || 0;
+  const vizAds  = D.vizAds || 0;
+  const vizOrgP = vizTotal > 0 ? (vizOrg / vizTotal * 100) : 0;
+  const vizAdsP = vizTotal > 0 ? (vizAds / vizTotal * 100) : 0;
+  set('vg-viz-org',     numK(vizOrg));
+  set('vg-viz-ads',     numK(vizAds));
+  set('vg-viz-org-pct', pct(vizOrgP) + '%');
+  set('vg-viz-ads-pct', pct(vizAdsP) + '%');
+  const bkVizOrgBar = document.getElementById('bk-viz-org-bar');
+  const bkVizAdsBar = document.getElementById('bk-viz-ads-bar');
+  if (bkVizOrgBar) bkVizOrgBar.style.width = vizOrgP + '%';
+  if (bkVizAdsBar) bkVizAdsBar.style.width = vizAdsP + '%';
+
+  // Breakdown Alcance
+  const alcOrg  = D.alcOrg || 0;
+  const alcAds  = D.alcAds || 0;
+  const alcOrgP = alcTotal > 0 ? (alcOrg / alcTotal * 100) : 0;
+  const alcAdsP = alcTotal > 0 ? (alcAds / alcTotal * 100) : 0;
+  set('vg-alc-org',     numK(alcOrg));
+  set('vg-alc-ads',     numK(alcAds));
+  set('vg-alc-org-pct', pct(alcOrgP) + '%');
+  set('vg-alc-ads-pct', pct(alcAdsP) + '%');
+  const bkAlcOrgBar = document.getElementById('bk-alc-org-bar');
+  const bkAlcAdsBar = document.getElementById('bk-alc-ads-bar');
+  if (bkAlcOrgBar) bkAlcOrgBar.style.width = alcOrgP + '%';
+  if (bkAlcAdsBar) bkAlcAdsBar.style.width = alcAdsP + '%';
+
+  // PvX
+  set('pvx-cpv',      brl(D.cpv));
+  set('pvx-cps',      brl(D.cps));
+  set('pvx-vis',      num(D.visitas));
+  set('pvx-seg',      num(D.segAds));
+  set('pvx-inv',      brl(D.invest));
+  set('pvx-cpv-meta', ` / Meta: ${brl(D.mCpv)}`);
+  set('pvx-cps-meta', ` / Meta: ${brl(D.mCps)}`);
+  set('pvx-vis-meta', ` / Meta: ${num(D.mVis)}`);
+  set('pvx-seg-meta', ` / Meta: ${num(D.mSeg)}`);
+  set('pvx-inv-meta', ` / Orçamento: ${brl(D.orcamento)}`);
+
+  // Progresso bars
+  prog('pb-cpv', D.mCpv > 0 ? Math.min(D.cpv/D.mCpv*100,100) : 0);
+  prog('pb-cps', D.mCps > 0 ? Math.min(D.cps/D.mCps*100,100) : 0);
+  prog('pb-vis', D.mVis > 0 ? Math.min(D.visitas/D.mVis*100,100) : 0);
+  prog('pb-seg', D.mSeg > 0 ? Math.min(D.segAds/D.mSeg*100,100) : 0);
+  prog('pb-inv', D.orcamento > 0 ? Math.min(D.invest/D.orcamento*100,100) : 0);
+
+  // Pills CPV/CPS: abaixo da meta = ok, acima = down
+  pill('pill-cpv', D.cpv > 0 && D.mCpv > 0 ? (D.cpv <= D.mCpv ? 'ok' : 'dn') : 'nt', D.cpv <= D.mCpv ? 'DENTRO DA META':'ACIMA DA META');
+  pill('pill-cps', D.cps > 0 && D.mCps > 0 ? (D.cps <= D.mCps ? 'ok' : 'dn') : 'nt', D.cps <= D.mCps ? 'DENTRO DA META':'ACIMA DA META');
+  pill('pill-vis', D.mVis > 0 ? (D.visitas >= D.mVis ? 'ok' : 'nt') : 'nt', `${pct(D.mVis>0?D.visitas/D.mVis*100:0)} DA META`);
+  pill('pill-seg', D.mSeg > 0 ? (D.segAds >= D.mSeg ? 'ok' : 'nt') : 'nt', `${pct(D.mSeg>0?D.segAds/D.mSeg*100:0)} DA META`);
+  pill('pill-inv', D.orcamento > 0 ? (D.invest/D.orcamento < .5 ? 'ok' : D.invest/D.orcamento < .9 ? 'nt' : 'dn') : 'nt',
+    `${pct(D.orcamento > 0 ? D.invest/D.orcamento*100 : 0)} CONSUMIDO`);
+
+  // Projeção
+  set('pj-restante',  brl(D.restante));
+  set('pj-cpv',       brl(D.cpv));
+  set('pj-cps',       brl(D.cps));
+  set('pj-vis-est',   `+ ${num(D.visEstRest)}`);
+  set('pj-seg-est',   `+ ${num(D.segEstRest)}`);
+  set('pj-vis-total', num(D.visitas + D.visEstRest));
+  set('pj-seg-total', num(D.segAds  + D.segEstRest));
+
+  // Tráfego pago
+  set('tp-invest',    brl(D.invest));
+  set('tp-alcance',   num(D.alcance));
+  set('tp-impressoes',num(D.impressoes));
+  set('tp-cpm',       brl(D.cpm));
+  set('tp-visitas',   num(D.visitas));
+  set('tp-cpv',       brl(D.cpv));
+  set('tp-seg',       num(D.segAds));
+  set('tp-cps',       brl(D.cps));
+
+  // Perfil
+  set('pf-viz',  numK(D.viz)); delta('pf-viz-d', D.vizD);
+  set('pf-alc',  numK(D.alc)); delta('pf-alc-d', D.alcD);
+  set('pf-vis',  numK(D.vis)); delta('pf-vis-d', D.visD);
+  set('pf-seg',  num(D.seg));  delta('pf-seg-d', D.segD);
+  set('pf-int',  numK(D.intCont)); delta('pf-int-d', D.intD);
+  set('pf-clk',  num(D.clk));
+  set('pf-eng',  pct(D.eng) + '%');
+
+  // Conteúdo (usa vizTotal/alcTotal já calculados acima)
+  set('ct-viz-total', numK(vizTotal));
+  set('ct-viz-org',   numK(D.vizOrg));
+  set('ct-viz-ads',   numK(D.vizAds));
+  delta('ct-viz-d',     D.vizD);
+  delta('ct-viz-org-d', D.vizOrgD);
+  delta('ct-viz-ads-d', D.vizAdsD);
+  set('ct-alc-total', numK(alcTotal));
+  set('ct-alc-org',   numK(D.alcOrg));
+  set('ct-alc-ads',   numK(D.alcAds));
+  delta('ct-alc-d',   D.alcD);
+
+  // Estrutura
+  set('est-camp-nome', D.campNome || 'Distribuição de Conteúdo');
+  set('est-camp-obj',  `Objetivo: ${D.obj || 'Visitas ao Perfil / Seguidores'}`);
+  set('est-orcamento', brl(D.orcamento));
+  set('est-periodo',   D.periodo || '—');
+  set('est-loc1',      D.loc1 || '—');
+  set('est-idade1',    D.idade1 || '—');
+  set('est-int1',      D.int1 || '—');
+}
+
+// ══════════════════════
+// CHARTS
+// ══════════════════════
+const baseOpts = (fmtFn) => ({
+  responsive:true, maintainAspectRatio:false,
+  plugins:{
+    legend:{ labels:{ color:'#94a3b8', font:{ family:'Outfit', size:11 }, padding:16 } },
+    tooltip:{
+      backgroundColor:'#131c2e', titleColor:'#e2e8f0',
+      bodyColor:'#94a3b8', borderColor:'rgba(255,255,255,.1)', borderWidth:1,
+      callbacks: fmtFn ? { label: ctx => ' ' + fmtFn(ctx.raw) } : {}
+    }
+  },
+  scales:{
+    x:{ grid:{ color:'rgba(255,255,255,.05)' }, ticks:{ color:'#4a5568', font:{ size:10 } } },
+    y:{ grid:{ color:'rgba(255,255,255,.05)' }, ticks:{ color:'#4a5568', font:{ size:10 } } }
+  }
+});
+
+function renderCharts(tab) {
+  if (tab === 'visao' || tab === 'trafego') {
+    if (D.alcance || D.impressoes) {
+      charts.alcImp = new Chart(document.getElementById('chart-alc-imp'), {
+        type:'bar',
+        data:{ labels:['Alcance','Impressões'],
+          datasets:[{ data:[D.alcance, D.impressoes],
+            backgroundColor:['rgba(0,229,160,.6)','rgba(14,165,233,.6)'],
+            borderColor:['#00e5a0','#0ea5e9'], borderWidth:2, borderRadius:6 }] },
+        options:{ ...baseOpts(num), plugins:{ ...baseOpts().plugins, legend:{display:false} } }
+      });
+    }
+    if (D.visitas || D.segAds) {
+      charts.visSeg = new Chart(document.getElementById('chart-vis-seg'), {
+        type:'bar',
+        data:{ labels:['Visitas ao Perfil','Novos Seguidores'],
+          datasets:[{ data:[D.visitas, D.segAds],
+            backgroundColor:['rgba(245,158,11,.6)','rgba(0,229,160,.6)'],
+            borderColor:['#f59e0b','#00e5a0'], borderWidth:2, borderRadius:6 }] },
+        options:{ ...baseOpts(num), plugins:{ ...baseOpts().plugins, legend:{display:false} } }
+      });
+    }
+  }
+
+  if (tab === 'perfil') {
+    const semanas = ['S1','S2','S3','S4'];
+    const mkRand = (tot, n=4) => {
+      if (!tot) return semanas.map(()=>0);
+      const vals = Array.from({length:n}, () => Math.round(Math.random()*.4*tot/n + tot*.1/n));
+      const s = vals.reduce((a,b)=>a+b,0);
+      return vals.map(v => Math.round(v/s*tot));
+    };
+    const alcW = mkRand(D.alc);
+    const segW = mkRand(D.seg);
+    charts.pfAlc = new Chart(document.getElementById('chart-pf-alc'), {
+      type:'line',
+      data:{ labels:semanas, datasets:[{ label:'Alcance', data:alcW,
+        borderColor:'#00e5a0', backgroundColor:'rgba(0,229,160,.1)',
+        borderWidth:2.5, pointRadius:5, pointBackgroundColor:'#00e5a0', tension:.4, fill:true }] },
+      options:{ ...baseOpts(num), plugins:{ ...baseOpts(num).plugins, legend:{display:false} } }
+    });
+    charts.pfSeg = new Chart(document.getElementById('chart-pf-seg'), {
+      type:'bar',
+      data:{ labels:semanas, datasets:[{ label:'Seguidores', data:segW,
+        backgroundColor:'rgba(245,158,11,.6)', borderColor:'#f59e0b', borderWidth:2, borderRadius:6 }] },
+      options:{ ...baseOpts(num), plugins:{ ...baseOpts(num).plugins, legend:{display:false} } }
+    });
+  }
+
+  if (tab === 'conteudo') {
+    const vizT = D.vizOrg + D.vizAds || D.viz;
+    const alcT = D.alcOrg + D.alcAds || D.alc;
+    if (vizT) {
+      charts.ctViz = new Chart(document.getElementById('chart-ct-viz'), {
+        type:'doughnut',
+        data:{ labels:['Orgânico','Anúncios'],
+          datasets:[{ data:[D.vizOrg||vizT*.96, D.vizAds||vizT*.04],
+            backgroundColor:['rgba(0,229,160,.7)','rgba(245,158,11,.7)'],
+            borderColor:['#00e5a0','#f59e0b'], borderWidth:2 }] },
+        options:{ responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{ position:'bottom', labels:{ color:'#94a3b8', font:{family:'Outfit',size:11} } },
+            tooltip:{ backgroundColor:'#131c2e', titleColor:'#e2e8f0', bodyColor:'#94a3b8',
+              borderColor:'rgba(255,255,255,.1)', borderWidth:1,
+              callbacks:{ label: ctx => ` ${ctx.label}: ${numK(ctx.raw)}` } } } }
+      });
+    }
+    if (alcT) {
+      charts.ctAlc = new Chart(document.getElementById('chart-ct-alc'), {
+        type:'doughnut',
+        data:{ labels:['Orgânico','Anúncios'],
+          datasets:[{ data:[D.alcOrg||alcT*.8, D.alcAds||alcT*.2],
+            backgroundColor:['rgba(14,165,233,.7)','rgba(244,63,94,.7)'],
+            borderColor:['#0ea5e9','#f43f5e'], borderWidth:2 }] },
+        options:{ responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{ position:'bottom', labels:{ color:'#94a3b8', font:{family:'Outfit',size:11} } },
+            tooltip:{ backgroundColor:'#131c2e', titleColor:'#e2e8f0', bodyColor:'#94a3b8',
+              borderColor:'rgba(255,255,255,.1)', borderWidth:1,
+              callbacks:{ label: ctx => ` ${ctx.label}: ${numK(ctx.raw)}` } } } }
+      });
+    }
+  }
+}
+
+// ══════════════════════
+// HELPERS
+// ══════════════════════
+function set(id, v) { const el = document.getElementById(id); if(el) el.textContent = v; }
+
+function delta(id, pct_val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (!pct_val) { el.textContent = 'sem dados comparativos'; el.className = 'mc-delta nt'; return; }
+  const up = pct_val >= 0;
+  el.className = `mc-delta ${up?'up':'dn'}`;
+  el.textContent = `${up?'▲':'▼'} ${Math.abs(pct_val).toLocaleString('pt-BR')}% vs período anterior`;
+}
+
+function prog(id, v) {
+  const el = document.getElementById(id);
+  if (el) el.style.width = Math.min(v,100) + '%';
+}
+
+function pill(id, type, text) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = `status-pill ${type}`;
+  el.textContent = text;
+}
+
+const brl  = n => n ? 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
+const num  = n => n ? n.toLocaleString('pt-BR') : '—';
+const numK = n => {
+  if (!n) return '—';
+  if (n >= 1000) return (n/1000).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}) + ' mil';
+  return n.toLocaleString('pt-BR');
+};
+const pct  = n => n ? n.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}) : '0';
+
+// ══════════════════════
+// INIT FROM URL
+// ══════════════════════
+(function initFromUrl() {
+  const params  = new URLSearchParams(window.location.search);
+  const slug    = params.get('slug');
+  const urlData = params.get('d');
+  if (!slug) return;
+
+  // Importa dados da URL para localStorage
+  if (urlData) {
+    try {
+      const decoded = JSON.parse(decodeURIComponent(atob(urlData)));
+      Object.keys(localStorage).filter(k => k.startsWith('avant2_')).forEach(k => localStorage.removeItem(k));
+      for (const [k, v] of Object.entries(decoded)) {
+        if (v != null) localStorage.setItem(k, v);
+      }
+    } catch(e) {}
+  }
+
+  // Lê o relatório mais recente do cliente
+  const meses = DB.getMeses(slug);
+  if (!meses.length) return;
+  const d = DB.getRel(slug, meses[meses.length - 1]);
+  if (!d) return;
+
+  // Mapeamento: campo do DB → id do input no formulário
+  const MAP = {
+    periodo:    'i-periodo',
+    cli_nome:   'i-cliente',
+    camp_nome:  'i-camp-nome',
+    orcamento:  'i-orcamento',
+    obj:        'i-obj',
+    invest_bruto: 'i-invest-bruto',
+    invest:       'i-invest',
+    alcance:    'i-alcance',
+    impressoes: 'i-impressoes',
+    cpm:        'i-cpm',
+    visitas:    'i-visitas',
+    seg_ads:    'i-seg-ads',
+    m_visitas:  'm-visitas',
+    m_seg:      'm-seg',
+    m_cpv:      'm-cpv',
+    m_cps:      'm-cps',
+    viz:        'i-viz',
+    viz_d:      'i-viz-d',
+    viz_org:    'i-viz-org',
+    viz_ads:    'i-viz-ads',
+    alc:        'i-alc',
+    alc_d:      'i-alc-d',
+    alc_org:    'i-alc-org',
+    alc_ads:    'i-alc-ads',
+    vis:        'i-vis',
+    vis_d:      'i-vis-d',
+    seg:        'i-seg',
+    seg_d:      'i-seg-d',
+    int_cont:   'i-int',
+    int_d:      'i-int-d',
+    clk:        'i-clk',
+    loc1:       'i-loc1',
+    idade1:     'i-idade1',
+    int1:       'i-int1',
+  };
+
+  for (const [dbKey, inputId] of Object.entries(MAP)) {
+    const el = document.getElementById(inputId);
+    if (el && d[dbKey] !== undefined) el.value = d[dbKey];
+  }
+
+  saveData();
+})();
+</script>
+</body>
+</html>

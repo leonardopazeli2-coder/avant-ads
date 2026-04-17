@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Avant Ads — Admin</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#f0f4f8;--bg2:#ffffff;--card:#ffffff;--b:rgba(0,0,0,.08);
+  --b2:rgba(0,0,0,.15);--acc:#185FA5;--acc2:#378ADD;--acc3:#f59e0b;
+  --acc4:#dc2626;--txt:#1e293b;--txt2:#475569;--txt3:#94a3b8;
+  --nav:#0C447C;--H:'Outfit',sans-serif;--M:'JetBrains Mono',monospace;--r:13px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--H);background:var(--bg);color:var(--txt);min-height:100vh;display:flex}
+
+aside{width:230px;min-height:100vh;background:#0C447C;border-right:none;
+  display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-logo{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
+.sb-brand{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.sb-dot{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff}
+.sb-name{font-size:15px;font-weight:800;letter-spacing:-.3px;color:#fff}
+.sb-badge{display:inline-block;padding:3px 9px;border-radius:5px;font-size:9px;font-weight:700;
+  letter-spacing:.4px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.2)}
+.sb-nav{padding:16px 10px;flex:1}
+.nav-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:rgba(255,255,255,.4);
+  margin-bottom:8px;padding:0 4px}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:9px;font-size:12px;
+  font-weight:500;color:rgba(255,255,255,.6);cursor:pointer;border:1px solid transparent;
+  transition:all .15s;margin-bottom:2px;user-select:none}
+.ni:hover{background:rgba(255,255,255,.08);color:#fff}
+.ni.active{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.15);color:#fff}
+.ni .ic{font-size:14px;width:18px;text-align:center}
+.sb-clients{padding:0 10px 14px}
+.sc-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:rgba(255,255,255,.4);margin-bottom:7px;padding:0 3px}
+.sc-item{display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:7px;font-size:11px;
+  font-weight:500;color:rgba(255,255,255,.6);cursor:pointer;transition:all .15s;margin-bottom:1px}
+.sc-item:hover{background:rgba(255,255,255,.1);color:#fff}
+.sc-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sc-dot.med{background:#378ADD}.sc-dot.gen{background:#378ADD}
+.sb-foot{padding:13px 18px;border-top:1px solid rgba(255,255,255,.1);font-size:10px;color:rgba(255,255,255,.3)}
+.sb-foot strong{color:#85B7EB}
+
+main{flex:1;overflow-y:auto}
+.topbar{padding:16px 26px;border-bottom:1px solid var(--b);display:flex;align-items:center;
+  justify-content:space-between;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.06);
+  position:sticky;top:0;z-index:50;gap:10px;flex-wrap:wrap}
+.tb-left h1{font-size:16px;font-weight:800;letter-spacing:-.3px}
+.tb-left p{font-size:11px;color:var(--txt2);margin-top:2px}
+.tb-right{display:flex;gap:7px;align-items:center}
+
+.btn{padding:8px 16px;border-radius:8px;font-family:var(--H);font-size:11px;font-weight:700;
+  cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+.btn-acc{background:var(--acc);color:#fff}.btn-acc:hover{opacity:.88}
+.btn-g{background:#fff;color:var(--txt2);border:1px solid var(--b2)}.btn-g:hover{color:var(--txt);border-color:var(--acc)}
+.btn-d{background:rgba(244,63,94,.1);color:var(--acc4);border:1px solid rgba(244,63,94,.2)}.btn-d:hover{background:rgba(244,63,94,.2)}
+.btn-sm{padding:5px 11px;font-size:10px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+.sec{display:none;padding:22px 26px 56px;animation:fi .2s ease}
+.sec.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+.grid{display:grid;gap:12px;margin-bottom:18px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:900px){.g4{grid-template-columns:repeat(2,1fr)}}
+
+.card{background:var(--card);border:1px solid var(--b);border-radius:var(--r);padding:17px 19px}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;
+  padding-bottom:13px;border-bottom:1px solid var(--b)}
+.card-hd h3{font-size:13px;font-weight:700}
+.card-hd p{font-size:10px;color:var(--txt2);margin-top:2px}
+
+.stat{background:var(--card);border:1px solid var(--b);border-radius:var(--r);padding:16px;position:relative;overflow:hidden}
+.stat-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--txt2);margin-bottom:7px}
+.stat-val{font-size:24px;font-weight:800;letter-spacing:-.4px}
+.stat-sub{font-size:10px;color:var(--txt3);margin-top:5px}
+.stat-ico{position:absolute;top:13px;right:13px;font-size:18px;opacity:.18}
+
+.tpl-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:5px;font-size:10px;font-weight:700}
+.tpl-med{background:rgba(12,68,124,.08);color:#0C447C;border:1px solid rgba(12,68,124,.2)}
+.tpl-gen{background:rgba(24,95,165,.1);color:#185FA5;border:1px solid rgba(24,95,165,.2)}
+
+.cli-list{display:flex;flex-direction:column;gap:9px}
+.cli-row{background:var(--card);border:1px solid var(--b);border-radius:var(--r);padding:14px 17px;
+  display:flex;align-items:center;gap:13px;transition:border-color .15s;cursor:pointer}
+.cli-row:hover{border-color:var(--b2)}
+.cli-av{width:38px;height:38px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;font-size:14px;font-weight:800;color:#0a0e17}
+.cli-av.med{background:linear-gradient(135deg,#378ADD,#0ea5e9)}
+.cli-av.gen{background:linear-gradient(135deg,#185FA5,#378ADD)}
+.cli-info{flex:1;min-width:0}
+.cli-name{font-size:13px;font-weight:700;margin-bottom:2px}
+.cli-meta{font-size:10px;color:var(--txt2)}
+.cli-actions{display:flex;gap:5px;flex-shrink:0}
+
+.m-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:18px}
+.m-tab{padding:5px 13px;border-radius:7px;font-size:11px;font-weight:600;background:var(--card);
+  border:1px solid var(--b);color:var(--txt2);cursor:pointer;transition:all .15s}
+.m-tab:hover{border-color:var(--b2);color:var(--txt)}
+.m-tab.active{background:var(--acc);border-color:var(--acc);color:#0a0e17}
+.m-tab.has::after{content:'•';margin-left:3px;color:var(--acc)}
+.m-tab.active.has::after{color:#0a0e17}
+
+.fs{margin-bottom:20px}
+.fs-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#185FA5;
+  margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.fs-title::after{content:'';flex:1;height:1px;background:rgba(24,95,165,.2)}
+.fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.ff{display:flex;flex-direction:column;gap:4px}
+.ff label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--txt3)}
+.ff input,.ff select,.ff textarea{background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;
+  padding:8px 11px;font-family:var(--M);font-size:11px;color:var(--txt);outline:none;
+  transition:border-color .15s;width:100%}
+.ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--acc)}
+.ff select{appearance:none;cursor:pointer}
+.ff textarea{resize:vertical;min-height:64px;font-family:var(--H);font-size:12px}
+.ff-hint{font-size:9px;color:var(--txt3);margin-top:1px}
+
+.sdiv{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--txt3);
+  display:flex;align-items:center;gap:10px;margin:20px 0 12px}
+.sdiv::after{content:'';flex:1;height:1px;background:var(--b)}
+
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:200;
+  align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.ov.open{display:flex}
+.modal{background:#fff;border:1px solid var(--b2);border-radius:16px;padding:26px;
+  width:100%;max-width:460px;max-height:90vh;overflow-y:auto;position:relative}
+.modal h2{font-size:17px;font-weight:800;margin-bottom:5px}
+.modal p{font-size:12px;color:var(--txt2);margin-bottom:20px}
+.mc{position:absolute;top:16px;right:16px;background:var(--card);border:1px solid var(--b);
+  border-radius:6px;padding:4px 9px;font-size:11px;color:var(--txt2);cursor:pointer;font-family:var(--H)}
+.mc:hover{color:var(--txt)}
+
+.lbox{background:var(--bg);border:1px solid var(--b2);border-radius:8px;padding:10px 13px;
+  display:flex;align-items:center;gap:9px;margin-top:12px}
+.lbox input{flex:1;background:none;border:none;outline:none;font-family:var(--M);font-size:11px;color:var(--acc2)}
+.lbox-cp{background:var(--acc2);color:#fff;border:none;border-radius:5px;padding:4px 11px;
+  font-size:10px;font-weight:700;cursor:pointer;font-family:var(--H);white-space:nowrap}
+
+.toast{position:fixed;bottom:22px;right:22px;background:#fff;border:1px solid var(--acc);
+  border-radius:9px;padding:11px 16px;font-size:12px;font-weight:600;color:var(--acc);
+  z-index:999;transform:translateY(70px);opacity:0;transition:all .28s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+
+.empty{text-align:center;padding:50px 22px;color:var(--txt3)}
+.empty .ei{font-size:44px;margin-bottom:13px}
+.empty h3{font-size:15px;font-weight:700;color:var(--txt2);margin-bottom:5px}
+.empty p{font-size:12px;line-height:1.6}
+
+/* loading skeleton */
+.skeleton{background:linear-gradient(90deg,#e2e8f0 25%,#f1f5f9 50%,#e2e8f0 75%);
+  background-size:200% 100%;animation:sk 1.4s infinite;border-radius:7px;height:52px}
+@keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── LOGIN ─────────────────────── */
+#auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#0C447C 0%,#185FA5 100%);
+  z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
+.auth-box{background:#fff;border-radius:20px;padding:36px 36px 32px;width:100%;max-width:400px;
+  box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.auth-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px}
+.auth-logo-dot{width:36px;height:36px;border-radius:9px;background:#0C447C;
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff}
+.auth-logo-name{font-size:20px;font-weight:800;color:#1e293b}
+.auth-sub{font-size:12px;color:#94a3b8;text-align:center;margin-bottom:26px}
+.auth-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;
+  color:#475569;margin-bottom:6px}
+.auth-inp{width:100%;padding:10px 13px;border-radius:9px;border:1.5px solid #e2e8f0;
+  font-family:var(--H);font-size:13px;margin-bottom:14px;outline:none;
+  background:#f8fafc;color:#1e293b;transition:border-color .15s}
+.auth-inp:focus{border-color:#185FA5;background:#fff}
+.auth-btn{width:100%;padding:13px;border-radius:10px;background:#185FA5;color:#fff;
+  font-family:var(--H);font-size:14px;font-weight:700;border:none;cursor:pointer;
+  transition:opacity .15s;margin-top:4px}
+.auth-btn:hover{opacity:.88}
+.auth-btn:disabled{opacity:.6;cursor:not-allowed}
+.auth-err{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;
+  padding:10px 13px;font-size:12px;color:#dc2626;margin-bottom:14px;display:none}
+.pwd-logout{display:block;margin-top:8px;background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.55);
+  border-radius:6px;padding:5px 10px;font-size:10px;cursor:pointer;
+  font-family:var(--H);width:100%;text-align:left;transition:all .15s}
+.pwd-logout:hover{background:rgba(255,255,255,.18);color:#fff}
+</style>
+</head>
+<body>
+
+<!-- TELA DE LOGIN -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="auth-logo-dot">A</div>
+      <div class="auth-logo-name">Avant Ads</div>
+    </div>
+    <p class="auth-sub">Painel Administrativo</p>
+    <div class="auth-lbl">Email</div>
+    <input class="auth-inp" type="email" id="auth-email" placeholder="seu@email.com"
+      onkeydown="if(event.key==='Enter')document.getElementById('auth-pass').focus()">
+    <div class="auth-lbl">Senha</div>
+    <input class="auth-inp" type="password" id="auth-pass" placeholder="Sua senha"
+      onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="auth-err" id="auth-err">Email ou senha incorretos.</div>
+    <button class="auth-btn" id="auth-btn" onclick="doLogin()">Entrar</button>
+  </div>
+</div>
+
+<aside>
+  <div class="sb-logo">
+    <div class="sb-brand">
+      <div class="sb-dot">A</div>
+      <div><div class="sb-name">Avant Ads</div></div>
+    </div>
+    <span class="sb-badge">⚙ Admin</span>
+  </div>
+  <div class="sb-nav">
+    <div class="nav-lbl">Menu</div>
+    <div class="ni active" onclick="goSec('dash')"><span class="ic">◈</span>Dashboard</div>
+    <div class="ni" id="ni-clientes" onclick="goSec('clientes')"><span class="ic">👥</span>Clientes</div>
+    <div class="ni" onclick="goSec('rels')"><span class="ic">📊</span>Relatórios</div>
+    <div class="ni" id="ni-cfg" onclick="goSec('cfg')"><span class="ic">⚙</span>Configurações</div>
+  </div>
+  <div class="sb-clients" id="sb-cli-wrap" style="display:none">
+    <div class="sc-lbl">Clientes</div>
+    <div id="sb-cli-items"></div>
+  </div>
+  <div class="sb-foot">
+    Avant Ads &copy; <strong id="sb-yr"></strong> · <span id="sb-user-lbl"></span>
+    <button class="pwd-logout" onclick="authLogout()">⎋ Sair da conta</button>
+  </div>
+</aside>
+
+<main>
+  <div class="topbar">
+    <div class="tb-left"><h1 id="tb-t">Dashboard</h1><p id="tb-s">Visão geral dos clientes</p></div>
+    <div class="tb-right" id="tb-right">
+      <button class="btn btn-g btn-sm" onclick="doExport()">⬇ Backup</button>
+      <button class="btn btn-acc" onclick="openNewCli()">+ Novo cliente</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="sec active" id="sec-dash">
+    <div class="grid g4" style="margin-top:4px">
+      <div class="stat"><div class="stat-ico">👥</div><div class="stat-lbl">Clientes</div><div class="stat-val" id="st-tot">—</div><div class="stat-sub">cadastrados</div></div>
+      <div class="stat"><div class="stat-ico">🏥</div><div class="stat-lbl">Médicos</div><div class="stat-val" id="st-med">—</div><div class="stat-sub">template médico</div></div>
+      <div class="stat"><div class="stat-ico">🏪</div><div class="stat-lbl">Empresas</div><div class="stat-val" id="st-gen">—</div><div class="stat-sub">template geral</div></div>
+      <div class="stat"><div class="stat-ico">📊</div><div class="stat-lbl">Relatórios</div><div class="stat-val" id="st-rels">—</div><div class="stat-sub">no total</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div><h3>Clientes recentes</h3><p>Últimas atualizações</p></div>
+        <button class="btn btn-g btn-sm" onclick="goSec('clientes')">Ver todos →</button></div>
+      <div id="dash-list"><div class="skeleton"></div></div>
+    </div>
+  </div>
+
+  <!-- CLIENTES -->
+  <div class="sec" id="sec-clientes">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div><h2 style="font-size:17px;font-weight:800">Clientes</h2><p style="font-size:11px;color:var(--txt2);margin-top:2px">Gerencie clientes e templates</p></div>
+      <button class="btn btn-acc" onclick="openNewCli()">+ Novo cliente</button>
+    </div>
+    <div id="cli-list-wrap"><div class="skeleton"></div></div>
+  </div>
+
+  <!-- RELATÓRIOS -->
+  <div class="sec" id="sec-rels">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div><h2 style="font-size:17px;font-weight:800" id="rel-title">Relatórios</h2>
+        <p style="font-size:11px;color:var(--txt2);margin-top:2px" id="rel-sub">Selecione um cliente</p></div>
+      <div style="display:flex;gap:7px" id="rel-acts">
+        <button class="btn btn-g btn-sm" onclick="showLink()">🔗 Link do cliente</button>
+        <button class="btn btn-acc btn-sm" onclick="openNewMes()">+ Novo mês</button>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <p style="font-size:12px;color:var(--txt2);margin-bottom:10px">Selecione um cliente:</p>
+      <div id="rel-pills" style="display:flex;gap:7px;flex-wrap:wrap"></div>
+    </div>
+    <div id="rel-months" style="display:none">
+      <div class="m-tabs" id="m-tabs"></div>
+      <div id="rel-form"></div>
+    </div>
+  </div>
+
+  <!-- CONFIG -->
+  <div class="sec" id="sec-cfg">
+    <h2 style="font-size:17px;font-weight:800;margin-bottom:4px">Configurações</h2>
+    <p style="font-size:11px;color:var(--txt2);margin-bottom:22px">URL, backup e conta</p>
+    <div class="grid g2">
+      <div class="card">
+        <div class="card-hd"><div><h3>🌐 URL do site</h3><p>Configure após publicar no Vercel</p></div></div>
+        <div class="ff" style="max-width:100%">
+          <label>URL base</label>
+          <input type="text" id="cfg-url" placeholder="https://avant-reports.vercel.app">
+          <span class="ff-hint">Link do cliente: [URL]/r/[slug]</span>
+        </div>
+        <button class="btn btn-acc btn-sm" style="margin-top:10px" onclick="saveCfg()">Salvar</button>
+      </div>
+      <div class="card">
+        <div class="card-hd"><div><h3>💾 Backup</h3><p>Exportar / importar dados</p></div></div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <button class="btn btn-acc btn-sm" onclick="doExport()">⬇ Baixar backup</button>
+          <input type="file" id="imp-file" accept=".json" style="display:none" onchange="doImport(event)">
+          <button class="btn btn-g btn-sm" onclick="document.getElementById('imp-file').click()">⬆ Importar</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="card-hd"><div><h3>🔑 Alterar minha senha</h3><p>Altera a senha da conta logada</p></div></div>
+      <div style="max-width:320px">
+        <div class="ff" style="margin-bottom:8px">
+          <label>Nova senha</label>
+          <input type="password" id="pwd-new" placeholder="Mínimo 6 caracteres">
+        </div>
+        <div class="ff" style="margin-bottom:10px">
+          <label>Confirmar nova senha</label>
+          <input type="password" id="pwd-new2" placeholder="Repita a senha">
+        </div>
+        <div class="auth-err" id="pwd-err"></div>
+        <button class="btn btn-acc btn-sm" onclick="changePwd()">Alterar senha</button>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px;border-color:rgba(244,63,94,.2)">
+      <div class="card-hd"><div><h3 style="color:var(--acc4)">⚠ Zona de perigo</h3></div></div>
+      <button class="btn btn-d btn-sm" onclick="clearAll()">🗑 Apagar todos os dados</button>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL CLIENTE -->
+<div class="ov" id="modal-cli">
+  <div class="modal">
+    <button class="mc" onclick="closeOv('modal-cli')">✕</button>
+    <h2 id="mc-title">Novo cliente</h2>
+    <p id="mc-sub">Preencha os dados do cliente</p>
+    <input type="hidden" id="mc-slug-orig">
+    <div class="fg" style="grid-template-columns:1fr">
+      <div class="ff"><label>Nome *</label><input id="mc-nome" oninput="autoSlug()" placeholder="Ex: Dr. João Silva"></div>
+      <div class="ff"><label>Slug (URL) *</label><input id="mc-slug" placeholder="dr-joao-silva"><span class="ff-hint">Usado na URL: /r/[slug]</span></div>
+      <div class="ff">
+        <label>Template *</label>
+        <select id="mc-tpl">
+          <option value="medico">🏥 Médico — funil + convênio + particular + cirurgias</option>
+          <option value="geral">🏪 Empresa Geral — tráfego pago + perfil + conteúdo</option>
+        </select>
+      </div>
+      <div class="ff"><label>Especialidade / Segmento</label><input id="mc-seg" placeholder="Ex: Ginecologia, E-commerce..."></div>
+      <div class="ff"><label>Observações</label><textarea id="mc-obs" placeholder="Informações adicionais..."></textarea></div>
+    </div>
+    <div style="display:flex;gap:7px;margin-top:16px;justify-content:flex-end">
+      <button class="btn btn-g" onclick="closeOv('modal-cli')">Cancelar</button>
+      <button class="btn btn-acc" onclick="saveCli()">Salvar cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LINK -->
+<div class="ov" id="modal-link">
+  <div class="modal">
+    <button class="mc" onclick="closeOv('modal-link')">✕</button>
+    <h2>🔗 Link do cliente</h2>
+    <p>Compartilhe este link. O cliente verá apenas o relatório.</p>
+    <div id="link-loading" style="font-size:12px;color:var(--txt3)">Gerando link...</div>
+    <div id="link-content" style="display:none">
+      <div class="lbox"><input type="text" id="link-val" readonly><button class="lbox-cp" onclick="cpLink()">Copiar</button></div>
+      <p style="font-size:10px;color:var(--txt3);margin-top:10px">✅ Link gerado com os dados embutidos — o cliente pode abrir direto.</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/supabase-db.js"></script>
+<script>
+document.getElementById('sb-yr').textContent = new Date().getFullYear();
+
+let curCli = null, curMes = null;
+let currentRole = null;
+
+// ── HELPERS ──────────────────────────────────
+function isAdmin() { return currentRole === 'admin'; }
+
+function setLoading(id, on) {
+  const el = document.getElementById(id);
+  if (el) el.disabled = on;
+}
+
+// ── NAV ──────────────────────────────────────
+const SECS = ['dash','clientes','rels','cfg'];
+const TITLES = {
+  dash:     ['Dashboard','Visão geral'],
+  clientes: ['Clientes','Gerencie seus clientes'],
+  rels:     ['Relatórios','Dados mensais por cliente'],
+  cfg:      ['Configurações','URL, backup e conta'],
+};
+
+function goSec(s) {
+  if (!isAdmin() && (s === 'clientes' || s === 'cfg')) s = 'dash';
+  document.querySelectorAll('.ni').forEach((n,i) => n.classList.toggle('active', SECS[i]===s));
+  document.querySelectorAll('.sec').forEach(x => x.classList.remove('active'));
+  document.getElementById('sec-'+s).classList.add('active');
+  document.getElementById('tb-t').textContent = TITLES[s][0];
+  document.getElementById('tb-s').textContent = TITLES[s][1];
+  if (s==='dash')      renderDash();
+  if (s==='clientes')  renderClis();
+  if (s==='rels')      renderRels();
+}
+
+// ── DASHBOARD ────────────────────────────────
+async function renderDash() {
+  try {
+    const cls = await DB.getClientes();
+    let rels = 0;
+    await Promise.all(cls.map(async c => { rels += (await DB.getMeses(c.slug)).length; }));
+    document.getElementById('st-tot').textContent  = cls.length;
+    document.getElementById('st-med').textContent  = cls.filter(c => c.tpl==='medico').length;
+    document.getElementById('st-gen').textContent  = cls.filter(c => c.tpl!=='medico').length;
+    document.getElementById('st-rels').textContent = rels;
+    renderSbClis(cls);
+    const wrap = document.getElementById('dash-list');
+    if (!cls.length) {
+      wrap.innerHTML = `<div class="empty"><div class="ei">📭</div><h3>Nenhum cliente</h3><p>Clique em "+ Novo cliente"</p></div>`;
+      return;
+    }
+    const rows = await Promise.all(cls.map(async c => {
+      const meses = await DB.getMeses(c.slug);
+      const ult   = await DB.getUltimoRel(c.slug);
+      const tplB  = c.tpl==='medico'
+        ? '<span class="tpl-badge tpl-med">🏥 Médico</span>'
+        : '<span class="tpl-badge tpl-gen">🏪 Geral</span>';
+      return `<div class="cli-row" onclick="openCliRel('${c.slug}')">
+        <div class="cli-av ${c.tpl==='medico'?'med':'gen'}">${c.nome[0].toUpperCase()}</div>
+        <div class="cli-info">
+          <div class="cli-name">${c.nome} ${tplB}</div>
+          <div class="cli-meta">${c.seg||'—'} · ${meses.length} mês(es) · Último: ${ult?.mesAno||'—'}</div>
+        </div>
+        <div class="cli-actions">
+          <button class="btn btn-g btn-sm" onclick="event.stopPropagation();openCliRel('${c.slug}')">📊</button>
+          <button class="btn btn-g btn-sm" onclick="event.stopPropagation();showLinkSlug('${c.slug}')">🔗</button>
+        </div>
+      </div>`;
+    }));
+    wrap.innerHTML = rows.join('');
+  } catch(e) { toast('Erro ao carregar dashboard'); console.error(e); }
+}
+
+function renderSbClis(cls) {
+  document.getElementById('sb-cli-wrap').style.display = cls.length ? 'block' : 'none';
+  document.getElementById('sb-cli-items').innerHTML = cls.map(c =>
+    `<div class="sc-item" onclick="openCliRel('${c.slug}')">
+      <span class="sc-dot ${c.tpl==='medico'?'med':'gen'}"></span>${c.nome}
+    </div>`).join('');
+}
+
+// ── CLIENTES ─────────────────────────────────
+async function renderClis() {
+  try {
+    const cls = await DB.getClientes();
+    renderSbClis(cls);
+    const wrap = document.getElementById('cli-list-wrap');
+    if (!cls.length) {
+      wrap.innerHTML = `<div class="empty"><div class="ei">👥</div><h3>Nenhum cliente</h3><p>Adicione um cliente para começar</p></div>`;
+      return;
+    }
+    const rows = await Promise.all(cls.map(async c => {
+      const meses = await DB.getMeses(c.slug);
+      const ult   = await DB.getUltimoRel(c.slug);
+      const tplB  = c.tpl==='medico'
+        ? '<span class="tpl-badge tpl-med">🏥 Médico</span>'
+        : '<span class="tpl-badge tpl-gen">🏪 Geral</span>';
+      return `<div class="cli-row">
+        <div class="cli-av ${c.tpl==='medico'?'med':'gen'}">${c.nome[0].toUpperCase()}</div>
+        <div class="cli-info">
+          <div class="cli-name">${c.nome} ${tplB}</div>
+          <div class="cli-meta">${c.seg||'Sem segmento'} · slug: ${c.slug} · ${meses.length} rel. · Último: ${ult?.mesAno||'—'}</div>
+        </div>
+        <div class="cli-actions">
+          <button class="btn btn-g btn-sm" onclick="openCliRel('${c.slug}')">📊 Rels.</button>
+          <button class="btn btn-g btn-sm" onclick="showLinkSlug('${c.slug}')">🔗 Link</button>
+          ${isAdmin() ? `
+          <button class="btn btn-g btn-sm" onclick="editCli('${c.slug}')">✏</button>
+          <button class="btn btn-d btn-sm" onclick="delCli('${c.slug}')">🗑</button>` : ''}
+        </div>
+      </div>`;
+    }));
+    wrap.innerHTML = `<div class="cli-list">${rows.join('')}</div>`;
+  } catch(e) { toast('Erro ao carregar clientes'); console.error(e); }
+}
+
+function openNewCli() {
+  document.getElementById('mc-title').textContent = 'Novo cliente';
+  document.getElementById('mc-sub').textContent   = 'Preencha os dados';
+  ['mc-nome','mc-slug','mc-seg','mc-obs'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('mc-tpl').value = 'medico';
+  document.getElementById('mc-slug-orig').value = '';
+  openOv('modal-cli');
+}
+
+async function editCli(slug) {
+  const c = await DB.getCliente(slug); if (!c) return;
+  document.getElementById('mc-title').textContent = 'Editar cliente';
+  document.getElementById('mc-sub').textContent   = 'Altere os dados';
+  document.getElementById('mc-nome').value = c.nome;
+  document.getElementById('mc-slug').value = c.slug;
+  document.getElementById('mc-tpl').value  = c.tpl||'medico';
+  document.getElementById('mc-seg').value  = c.seg||'';
+  document.getElementById('mc-obs').value  = c.obs||'';
+  document.getElementById('mc-slug-orig').value = c.slug;
+  openOv('modal-cli');
+}
+
+function autoSlug() {
+  if (!document.getElementById('mc-slug-orig').value)
+    document.getElementById('mc-slug').value = DB.slugify(document.getElementById('mc-nome').value);
+}
+
+async function saveCli() {
+  const nome = document.getElementById('mc-nome').value.trim();
+  const slug = document.getElementById('mc-slug').value.trim();
+  const tpl  = document.getElementById('mc-tpl').value;
+  const seg  = document.getElementById('mc-seg').value.trim();
+  const obs  = document.getElementById('mc-obs').value.trim();
+  if (!nome||!slug) { toast('Preencha nome e slug'); return; }
+  try {
+    await DB.upsertCliente({ nome, slug, tpl, seg, obs });
+    closeOv('modal-cli'); toast('Cliente salvo!');
+    renderDash(); renderClis();
+  } catch(e) { toast('Erro ao salvar cliente'); console.error(e); }
+}
+
+async function delCli(slug) {
+  if (!confirm(`Apagar "${slug}" e todos os relatórios?`)) return;
+  try {
+    await DB.deleteCliente(slug);
+    if (curCli===slug) curCli=null;
+    toast('Cliente removido'); renderDash(); renderClis();
+  } catch(e) { toast('Erro ao apagar cliente'); console.error(e); }
+}
+
+// ── RELATÓRIOS ───────────────────────────────
+async function renderRels() {
+  try {
+    const cls = await DB.getClientes();
+    document.getElementById('rel-pills').innerHTML = cls.map(c =>
+      `<button class="btn ${curCli===c.slug?'btn-acc':'btn-g'} btn-sm" onclick="selectCliRel('${c.slug}')">${c.nome}</button>`
+    ).join('') || '<span style="font-size:12px;color:var(--txt3)">Nenhum cliente cadastrado</span>';
+    if (curCli) selectCliRel(curCli);
+  } catch(e) { toast('Erro ao carregar relatórios'); console.error(e); }
+}
+
+function openCliRel(slug) { curCli=slug; goSec('rels'); selectCliRel(slug); }
+
+async function selectCliRel(slug) {
+  curCli = slug;
+  try {
+    const cls = await DB.getClientes();
+    renderSbClis(cls);
+    document.querySelectorAll('#rel-pills .btn').forEach(b => {
+      const isCur = b.onclick.toString().includes(`'${slug}'`);
+      b.className = `btn ${isCur?'btn-acc':'btn-g'} btn-sm`;
+    });
+    const cli   = await DB.getCliente(slug);
+    const meses = await DB.getMeses(slug);
+    document.getElementById('rel-title').textContent = `Relatórios — ${cli?.nome||slug}`;
+    document.getElementById('rel-sub').textContent   = `${meses.length} mês(es) · Template: ${cli?.tpl==='medico'?'Médico':'Geral'}`;
+    document.getElementById('rel-months').style.display = 'block';
+    renderMTabs(slug, meses);
+  } catch(e) { toast('Erro ao carregar relatórios'); console.error(e); }
+}
+
+function renderMTabs(slug, meses) {
+  const el = document.getElementById('m-tabs');
+  if (!meses.length) {
+    el.innerHTML = `<span style="font-size:12px;color:var(--txt3)">Nenhum mês. Clique em "+ Novo mês"</span>`;
+    document.getElementById('rel-form').innerHTML = '';
+    return;
+  }
+  if (!curMes || !meses.includes(curMes)) curMes = meses[meses.length-1];
+  el.innerHTML = meses.map(m =>
+    `<div class="m-tab has${curMes===m?' active':''}" onclick="selMes('${slug}','${m}')">${m}</div>`
+  ).join('');
+  renderForm(slug, curMes);
+}
+
+async function selMes(slug, mes) {
+  curMes = mes;
+  const meses = await DB.getMeses(slug);
+  document.querySelectorAll('#m-tabs .m-tab').forEach((t,i) => {
+    t.classList.toggle('active', meses[i]===mes);
+  });
+  renderForm(slug, mes);
+}
+
+async function openNewMes() {
+  if (!curCli) { toast('Selecione um cliente'); return; }
+  const mes = prompt('Mês/Ano (ex: Abril/2025):');
+  if (!mes?.trim()) return;
+  try {
+    curMes = mes.trim();
+    await DB.saveRel(curCli, curMes, {});
+    renderMTabs(curCli, await DB.getMeses(curCli));
+    toast(`Mês "${curMes}" criado!`);
+  } catch(e) { toast('Erro ao criar mês'); console.error(e); }
+}
+
+function showLink() { if (curCli) showLinkSlug(curCli); }
+
+async function showLinkSlug(slug) {
+  openOv('modal-link');
+  document.getElementById('link-loading').style.display = 'block';
+  document.getElementById('link-content').style.display = 'none';
+  try {
+    const base    = await DB.getConfig('url') || window.location.origin;
+    const cli     = await DB.getCliente(slug);
+    const tpl     = cli?.tpl || 'medico';
+    const allData = await DB.buildClientLinkData(slug);
+    const b64     = btoa(encodeURIComponent(JSON.stringify(allData)));
+    const page    = tpl === 'medico' ? 'medico.html' : 'geral.html';
+    document.getElementById('link-val').value = `${base}/r/${page}?slug=${slug}&d=${b64}`;
+    document.getElementById('link-loading').style.display = 'none';
+    document.getElementById('link-content').style.display = 'block';
+  } catch(e) {
+    toast('Erro ao gerar link'); console.error(e);
+    closeOv('modal-link');
+  }
+}
+
+function cpLink() {
+  navigator.clipboard.writeText(document.getElementById('link-val').value).then(()=>toast('Link copiado!'));
+}
+
+// ── FORM POR TEMPLATE ────────────────────────
+const FIELDS_MED = [
+  { sec:'📋 Informações Gerais', fields:[
+    {id:'periodo',label:'Mês/Período',ph:'Ex: Março/2025'},
+    {id:'cli_nome',label:'Nome do Médico',ph:'Ex: Dr. João Silva'},
+    {id:'especialidade',label:'Especialidade',ph:'Ex: Ginecologia'},
+    {id:'orcamento',label:'Orçamento Total (R$)',tp:'number',ph:'0'},
+  ]},
+  { sec:'💰 Investimento & Funil', fields:[
+    {id:'invest_bruto',label:'Investimento Bruto (R$)',tp:'number',ph:'0'},
+    {id:'invest',label:'Investimento Líquido (R$)',tp:'number',ph:'0'},
+    {id:'atend',label:'Total Atendimentos',tp:'number',ph:'0'},
+    {id:'leads',label:'Leads Únicos',tp:'number',ph:'0'},
+    {id:'mql',label:'MQL (Leads Qualif.)',tp:'number',ph:'0'},
+  ]},
+  { sec:'🔴 Convênio', fields:[
+    {id:'conv_n',label:'Nº Consultas',tp:'number',ph:'0'},
+  ]},
+  { sec:'🟢 Particular', fields:[
+    {id:'part_n',label:'Nº Consultas',tp:'number',ph:'0'},
+    {id:'part_fat',label:'Faturamento (R$)',tp:'number',ph:'0'},
+  ]},
+  { sec:'🟣 Cirurgias (Particular)', fields:[
+    {id:'cir_n',label:'Nº Cirurgias',tp:'number',ph:'0'},
+    {id:'cir_fat',label:'Faturamento (R$)',tp:'number',ph:'0'},
+  ]},
+  { sec:'💸 Custos de Marketing', fields:[
+    {id:'custo_agencia',label:'Honorário Agência (R$)',tp:'number',ph:'0',adminOnly:true},
+    {id:'custo_crm',label:'CRM (R$)',tp:'number',ph:'0'},
+    {id:'custo_outros',label:'Outros (R$)',tp:'number',ph:'0'},
+  ]},
+  { sec:'📸 Instagram', fields:[
+    {id:'ig_viz',label:'Visualizações',tp:'number',ph:'0'},
+    {id:'ig_viz_org',label:'Viz. Orgânico',tp:'number',ph:'0'},
+    {id:'ig_viz_ads',label:'Viz. Anúncios',tp:'number',ph:'0'},
+    {id:'ig_alc',label:'Alcance',tp:'number',ph:'0'},
+    {id:'ig_alc_org',label:'Alcance Orgânico',tp:'number',ph:'0'},
+    {id:'ig_alc_ads',label:'Alcance Anúncios',tp:'number',ph:'0'},
+    {id:'ig_vis',label:'Visitas ao Perfil',tp:'number',ph:'0'},
+    {id:'ig_seg',label:'Novos Seguidores',tp:'number',ph:'0'},
+    {id:'ig_int',label:'Interações',tp:'number',ph:'0'},
+  ]},
+  { sec:'📘 Facebook', fields:[
+    {id:'fb_viz',label:'Visualizações',tp:'number',ph:'0'},
+    {id:'fb_viz_org',label:'Viz. Orgânico',tp:'number',ph:'0'},
+    {id:'fb_viz_ads',label:'Viz. Anúncios',tp:'number',ph:'0'},
+    {id:'fb_alc',label:'Alcance',tp:'number',ph:'0'},
+    {id:'fb_alc_org',label:'Alcance Orgânico',tp:'number',ph:'0'},
+    {id:'fb_alc_ads',label:'Alcance Anúncios',tp:'number',ph:'0'},
+    {id:'fb_vis',label:'Visitas à Página',tp:'number',ph:'0'},
+    {id:'fb_seg',label:'Novos Seguidores',tp:'number',ph:'0'},
+    {id:'fb_int',label:'Interações',tp:'number',ph:'0'},
+  ]},
+];
+
+const FIELDS_GEN = [
+  { sec:'📋 Informações Gerais', fields:[
+    {id:'periodo',label:'Mês/Período',ph:'Ex: Março/2025'},
+    {id:'cli_nome',label:'Nome do Cliente',ph:'Ex: Nacarati Semijoias'},
+    {id:'camp_nome',label:'Nome da Campanha',ph:'Distribuição de Conteúdo — Mar25'},
+    {id:'orcamento',label:'Orçamento Total (R$)',tp:'number',ph:'0'},
+    {id:'obj',label:'Objetivo da Campanha',ph:'Ex: Visitas ao Perfil'},
+  ]},
+  { sec:'💰 Tráfego Pago (Meta Ads)', fields:[
+    {id:'invest_bruto',label:'Investimento Bruto (R$)',tp:'number',ph:'0'},
+    {id:'invest',label:'Investimento Líquido (R$)',tp:'number',ph:'0'},
+    {id:'alcance',label:'Alcance',tp:'number',ph:'0'},
+    {id:'impressoes',label:'Impressões',tp:'number',ph:'0'},
+    {id:'cpm',label:'CPM (R$)',tp:'number',ph:'0',step:'0.01'},
+    {id:'visitas',label:'Visitas ao Perfil',tp:'number',ph:'0'},
+    {id:'seg_ads',label:'Novos Seguidores (ads)',tp:'number',ph:'0'},
+  ]},
+  { sec:'🎯 Metas', fields:[
+    {id:'m_visitas',label:'Meta Visitas',tp:'number',ph:'0'},
+    {id:'m_seg',label:'Meta Seguidores',tp:'number',ph:'0'},
+    {id:'m_cpv',label:'Meta CPV (R$)',tp:'number',ph:'0',step:'0.01'},
+    {id:'m_cps',label:'Meta CPS (R$)',tp:'number',ph:'0',step:'0.01'},
+  ]},
+  { sec:'📱 Números do Perfil', fields:[
+    {id:'viz',label:'Visualizações Totais',tp:'number',ph:'0'},
+    {id:'viz_d',label:'Variação Viz. (%)',tp:'number',ph:'0',step:'0.1'},
+    {id:'viz_org',label:'Visualizações Orgânico',tp:'number',ph:'0'},
+    {id:'viz_ads',label:'Visualizações Anúncios',tp:'number',ph:'0'},
+    {id:'alc',label:'Alcance Total',tp:'number',ph:'0'},
+    {id:'alc_d',label:'Variação Alcance (%)',tp:'number',ph:'0',step:'0.1'},
+    {id:'alc_org',label:'Alcance Orgânico',tp:'number',ph:'0'},
+    {id:'alc_ads',label:'Alcance Anúncios',tp:'number',ph:'0'},
+    {id:'vis',label:'Visitas ao Perfil (total)',tp:'number',ph:'0'},
+    {id:'vis_d',label:'Variação Visitas (%)',tp:'number',ph:'0',step:'0.1'},
+    {id:'seg',label:'Novos Seguidores (total)',tp:'number',ph:'0'},
+    {id:'seg_d',label:'Variação Seguidores (%)',tp:'number',ph:'0',step:'0.1'},
+    {id:'int_cont',label:'Interações',tp:'number',ph:'0'},
+    {id:'int_d',label:'Variação Interações (%)',tp:'number',ph:'0',step:'0.1'},
+    {id:'clk',label:'Cliques no Link',tp:'number',ph:'0'},
+  ]},
+  { sec:'🏗️ Estrutura da Campanha', fields:[
+    {id:'loc1',label:'Localização',ph:'Ex: Manhuaçu e região'},
+    {id:'idade1',label:'Faixa Etária',ph:'Ex: 25–55 anos'},
+    {id:'int1',label:'Interesses',ph:'Ex: Moda, Acessórios'},
+  ]},
+];
+
+async function renderForm(slug, mes) {
+  document.getElementById('rel-form').innerHTML = '<div class="skeleton"></div>';
+  try {
+    const cli    = await DB.getCliente(slug);
+    const data   = await DB.getRel(slug, mes) || {};
+    const tpl    = cli?.tpl || 'medico';
+    const FIELDS = tpl === 'medico' ? FIELDS_MED : FIELDS_GEN;
+
+    const html = FIELDS.map(sec => `
+      <div class="fs">
+        <div class="fs-title">${sec.sec}</div>
+        <div class="fg">
+          ${sec.fields.filter(f => !f.adminOnly || isAdmin()).map(f => `
+            <div class="ff">
+              <label>${f.label}</label>
+              <input type="${f.tp||'text'}" id="f_${f.id}" placeholder="${f.ph}"
+                ${f.step?`step="${f.step}"`:''}
+                value="${data[f.id]!==undefined?data[f.id]:''}">
+            </div>`).join('')}
+        </div>
+      </div>`).join('');
+
+    document.getElementById('rel-form').innerHTML = `
+      <div class="card">
+        <div class="card-hd">
+          <div><h3>Dados de ${mes}</h3><p>Template: ${tpl==='medico'?'🏥 Médico':'🏪 Geral'}</p></div>
+          <div style="display:flex;gap:7px">
+            <button class="btn btn-d btn-sm" onclick="delMes('${slug}','${mes}')">🗑 Apagar</button>
+            <button class="btn btn-acc" onclick="saveRel('${slug}','${mes}')">✓ Salvar</button>
+          </div>
+        </div>
+        ${html}
+        <div style="display:flex;justify-content:flex-end;gap:7px;padding-top:14px;border-top:1px solid var(--b)">
+          <button class="btn btn-g" onclick="showLinkSlug('${slug}')">🔗 Ver link</button>
+          <button class="btn btn-acc" onclick="saveRel('${slug}','${mes}')">✓ Salvar relatório</button>
+        </div>
+      </div>`;
+  } catch(e) { toast('Erro ao carregar formulário'); console.error(e); }
+}
+
+async function saveRel(slug, mes) {
+  const cli    = await DB.getCliente(slug);
+  const tpl    = cli?.tpl || 'medico';
+  const FIELDS = tpl === 'medico' ? FIELDS_MED : FIELDS_GEN;
+  const data   = {};
+  FIELDS.forEach(sec => sec.fields.forEach(f => {
+    const el = document.getElementById('f_'+f.id); if(!el) return;
+    data[f.id] = f.tp==='number' ? (parseFloat(el.value)||0) : el.value.trim();
+  }));
+  try {
+    await DB.saveRel(slug, mes, data);
+    toast('✓ Salvo!'); renderDash();
+  } catch(e) { toast('Erro ao salvar'); console.error(e); }
+}
+
+async function delMes(slug, mes) {
+  if (!confirm(`Apagar ${mes}?`)) return;
+  try {
+    await DB.deleteRel(slug, mes); curMes=null; toast('Mês removido');
+    renderMTabs(slug, await DB.getMeses(slug));
+  } catch(e) { toast('Erro ao apagar mês'); console.error(e); }
+}
+
+// ── CONFIG ───────────────────────────────────
+async function saveCfg() {
+  try {
+    await DB.setConfig('url', document.getElementById('cfg-url').value.trim());
+    toast('URL salva!');
+  } catch(e) { toast('Erro ao salvar'); }
+}
+
+async function doExport() {
+  try {
+    const json = await DB.exportAll();
+    const blob = new Blob([json], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `avant-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.click(); toast('Backup baixado!');
+  } catch(e) { toast('Erro ao exportar'); console.error(e); }
+}
+
+async function doImport(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = async ev => {
+    try {
+      await DB.importAll(ev.target.result);
+      toast('Dados importados!'); renderDash();
+    } catch { toast('Erro ao importar'); }
+  };
+  r.readAsText(f);
+}
+
+async function clearAll() {
+  if (!confirm('Apagar TODOS os dados? Irreversível.')) return;
+  try {
+    const cls = await DB.getClientes();
+    await Promise.all(cls.map(c => DB.deleteCliente(c.slug)));
+    toast('Dados apagados'); renderDash(); renderClis();
+  } catch(e) { toast('Erro ao apagar dados'); console.error(e); }
+}
+
+async function changePwd() {
+  const newP  = document.getElementById('pwd-new').value;
+  const newP2 = document.getElementById('pwd-new2').value;
+  const errEl = document.getElementById('pwd-err');
+  if (newP.length < 6) { errEl.textContent='Mínimo 6 caracteres.'; errEl.style.display='block'; return; }
+  if (newP !== newP2)  { errEl.textContent='As senhas não coincidem.'; errEl.style.display='block'; return; }
+  try {
+    await DB.changePassword(newP);
+    errEl.style.display='none';
+    document.getElementById('pwd-new').value='';
+    document.getElementById('pwd-new2').value='';
+    toast('✓ Senha alterada!');
+  } catch(e) { errEl.textContent=e.message||'Erro ao alterar senha'; errEl.style.display='block'; }
+}
+
+// ── MODAL / TOAST ─────────────────────────────
+function openOv(id)  { document.getElementById(id).classList.add('open'); }
+function closeOv(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.ov').forEach(m => m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); }));
+
+let _tt;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(_tt); _tt = setTimeout(()=>el.classList.remove('show'), 2800);
+}
+
+// ── AUTH ──────────────────────────────────────
+function applyRoleRestrictions() {
+  if (isAdmin()) return;
+  document.getElementById('ni-clientes').style.display = 'none';
+  document.getElementById('ni-cfg').style.display = 'none';
+  document.getElementById('tb-right').style.display = 'none';
+}
+
+async function authCheck() {
+  const session = await DB.getSession();
+  if (session) {
+    currentRole = session.user?.user_metadata?.role || 'colab';
+    document.getElementById('auth-screen').style.display = 'none';
+    const labels = { admin: 'Admin', colab: 'Colaborador' };
+    const lbl = document.getElementById('sb-user-lbl');
+    if (lbl) lbl.textContent = labels[currentRole] || currentRole;
+    applyRoleRestrictions();
+    // carrega URL salva no config
+    const url = await DB.getConfig('url');
+    if (url) document.getElementById('cfg-url').value = url;
+    renderDash();
+  }
+}
+
+async function doLogin() {
+  const email  = document.getElementById('auth-email').value.trim();
+  const pass   = document.getElementById('auth-pass').value;
+  const errEl  = document.getElementById('auth-err');
+  const btn    = document.getElementById('auth-btn');
+  if (!email || !pass) { errEl.textContent='Preencha email e senha.'; errEl.style.display='block'; return; }
+  btn.disabled = true; btn.textContent = 'Entrando...';
+  try {
+    const { user } = await DB.login(email, pass);
+    currentRole = user?.user_metadata?.role || 'colab';
+    document.getElementById('auth-screen').style.display = 'none';
+    const labels = { admin: 'Admin', colab: 'Colaborador' };
+    const lbl = document.getElementById('sb-user-lbl');
+    if (lbl) lbl.textContent = labels[currentRole] || currentRole;
+    errEl.style.display = 'none';
+    applyRoleRestrictions();
+    const url = await DB.getConfig('url');
+    if (url) document.getElementById('cfg-url').value = url;
+    renderDash();
+  } catch(e) {
+    errEl.textContent = 'Email ou senha incorretos.';
+    errEl.style.display = 'block';
+    document.getElementById('auth-pass').value = '';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Entrar';
+  }
+}
+
+async function authLogout() {
+  await DB.logout();
+  location.reload();
+}
+
+authCheck();
+</script>
+</body>
+</html>
