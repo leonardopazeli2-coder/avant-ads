@@ -219,7 +219,7 @@ td.purple{color:var(--purple);font-weight:600}
     </div>
 
     <div class="sdiv">Resultados por Modalidade</div>
-    <div class="grid g3">
+    <div class="grid g2">
       <div class="seg-card conv">
         <div class="seg-title">🔴 Convênio</div>
         <div class="seg-row"><span class="seg-lbl">Nº Consultas</span><span class="seg-val" id="vg-conv-n">—</span></div>
@@ -234,13 +234,26 @@ td.purple{color:var(--purple);font-weight:600}
         <div class="seg-row"><span class="seg-lbl">TC / Leads</span><span class="seg-val" id="vg-part-tc">—</span></div>
         <div class="seg-row"><span class="seg-lbl">Custo / Consulta</span><span class="seg-val" id="vg-part-cpc">—</span></div>
       </div>
-      <div class="seg-card cir">
-        <div class="seg-title">🟣 Cirurgias</div>
+    </div>
+
+    <div class="sdiv">Funil de Cirurgias — Particular</div>
+    <div class="grid g4">
+      <div class="seg-card" style="border-top:3px solid #7c3aed">
+        <div class="seg-title" style="color:#7c3aed">Consultas Particulares</div>
+        <div class="seg-row"><span class="seg-lbl">Nº Consultas</span><span class="seg-val" id="vg-cir-part-n">—</span></div>
+      </div>
+      <div class="seg-card" style="border-top:3px solid #7c3aed">
+        <div class="seg-title" style="color:#7c3aed">Cirurgias Fechadas</div>
         <div class="seg-row"><span class="seg-lbl">Nº Cirurgias</span><span class="seg-val" id="vg-cir-n">—</span></div>
-        <div class="seg-row"><span class="seg-lbl">% do Total Atendimentos</span><span class="seg-val" id="vg-cir-pct-atend">—</span></div>
-        <div class="seg-row"><span class="seg-lbl">Faturamento</span><span class="seg-val" id="vg-cir-fat">—</span></div>
-        <div class="seg-row"><span class="seg-lbl">TC / Leads</span><span class="seg-val" id="vg-cir-tc">—</span></div>
-        <div class="seg-row"><span class="seg-lbl">Custo / Cirurgia</span><span class="seg-val" id="vg-cir-cpc">—</span></div>
+        <div class="seg-row"><span class="seg-lbl">Faturamento</span><span class="seg-val" id="vg-cir-fat-sub">—</span></div>
+      </div>
+      <div class="seg-card" style="border-top:3px solid #7c3aed;background:linear-gradient(135deg,#4c1d95,#6d28d9)">
+        <div class="seg-title" style="color:#ddd6fe">Taxa Consulta → Cirurgia</div>
+        <div class="seg-row"><span class="seg-lbl" style="color:#c4b5fd">% das consultas convertidas</span><span class="seg-val" style="color:#fff" id="vg-cir-conv-rate">—</span></div>
+      </div>
+      <div class="seg-card" style="border-top:3px solid #7c3aed;background:linear-gradient(135deg,#3b0764,#5b21b6)">
+        <div class="seg-title" style="color:#ddd6fe">Custo / Cirurgia</div>
+        <div class="seg-row"><span class="seg-lbl" style="color:#c4b5fd">Investimento / cirurgias</span><span class="seg-val" style="color:#fff" id="vg-cir-cpc">—</span></div>
       </div>
     </div>
 
@@ -292,7 +305,7 @@ td.purple{color:var(--purple);font-weight:600}
   <!-- RESULTADOS -->
   <div class="sec" id="sec-resultado">
     <div class="sdiv">Performance por Modalidade</div>
-    <div class="grid g3">
+    <div class="grid g2">
       <div class="seg-card conv">
         <div class="seg-title">🔴 Convênio / Plano</div>
         <div class="seg-row"><span class="seg-lbl">Nº Consultas</span><span class="seg-val" id="r-conv-n">—</span></div>
@@ -308,14 +321,26 @@ td.purple{color:var(--purple);font-weight:600}
         <div class="seg-row"><span class="seg-lbl">TC / Atend. (%)</span><span class="seg-val" id="r-part-tca">—</span></div>
         <div class="seg-row"><span class="seg-lbl">Custo / Consulta</span><span class="seg-val" id="r-part-cpc">—</span></div>
       </div>
-      <div class="seg-card cir">
-        <div class="seg-title">🟣 Cirurgias</div>
+    </div>
+
+    <div class="sdiv">Funil de Cirurgias — Particular</div>
+    <div class="grid g4">
+      <div class="seg-card" style="border-top:3px solid #7c3aed">
+        <div class="seg-title" style="color:#7c3aed">Consultas Particulares</div>
+        <div class="seg-row"><span class="seg-lbl">Nº Consultas</span><span class="seg-val" id="r-cir-part-n">—</span></div>
+      </div>
+      <div class="seg-card" style="border-top:3px solid #7c3aed">
+        <div class="seg-title" style="color:#7c3aed">Cirurgias Fechadas</div>
         <div class="seg-row"><span class="seg-lbl">Nº Cirurgias</span><span class="seg-val" id="r-cir-n">—</span></div>
-        <div class="seg-row"><span class="seg-lbl">% do Total Atendimentos</span><span class="seg-val" id="r-cir-pct-atend">—</span></div>
         <div class="seg-row"><span class="seg-lbl">Faturamento</span><span class="seg-val" id="r-cir-fat">—</span></div>
-        <div class="seg-row"><span class="seg-lbl">TC / Leads (%)</span><span class="seg-val" id="r-cir-tcl">—</span></div>
-        <div class="seg-row"><span class="seg-lbl">TC / Atend. (%)</span><span class="seg-val" id="r-cir-tca">—</span></div>
-        <div class="seg-row"><span class="seg-lbl">Custo / Cirurgia</span><span class="seg-val" id="r-cir-cpc">—</span></div>
+      </div>
+      <div class="seg-card" style="border-top:3px solid #7c3aed;background:linear-gradient(135deg,#4c1d95,#6d28d9)">
+        <div class="seg-title" style="color:#ddd6fe">Taxa de Conversão</div>
+        <div class="seg-row"><span class="seg-lbl" style="color:#c4b5fd">Consulta → Cirurgia</span><span class="seg-val" style="color:#fff" id="r-cir-conv-rate">—</span></div>
+      </div>
+      <div class="seg-card" style="border-top:3px solid #7c3aed;background:linear-gradient(135deg,#3b0764,#5b21b6)">
+        <div class="seg-title" style="color:#ddd6fe">Custo / Cirurgia</div>
+        <div class="seg-row"><span class="seg-lbl" style="color:#c4b5fd">Investimento / cirurgias</span><span class="seg-val" style="color:#fff" id="r-cir-cpc">—</span></div>
       </div>
     </div>
 
@@ -625,9 +650,10 @@ if (!D || !cli || cli.tpl !== 'medico') {
   const conv_tca= D.atend > 0 ? (D.conv_n||0) / D.atend * 100 : 0;
   const part_tca= D.atend > 0 ? (D.part_n||0) / D.atend * 100 : 0;
   const cir_tca = D.atend > 0 ? (D.cir_n||0)  / D.atend * 100 : 0;
-  const conv_cpc= D.conv_n > 0 ? (D.invest||0) / D.conv_n : 0;
-  const part_cpc= D.part_n > 0 ? (D.invest||0) / D.part_n : 0;
-  const cir_cpc = D.cir_n  > 0 ? (D.invest||0) / D.cir_n  : 0;
+  const conv_cpc     = D.conv_n > 0 ? (D.invest||0) / D.conv_n : 0;
+  const part_cpc     = D.part_n > 0 ? (D.invest||0) / D.part_n : 0;
+  const cir_cpc      = D.cir_n  > 0 ? (D.invest||0) / D.cir_n  : 0;
+  const cir_conv_rate= D.part_n > 0 ? (D.cir_n||0)  / D.part_n * 100 : 0;
   const mql_pct = D.leads  > 0 ? (D.mql||0) / D.leads * 100 : 0;
 
   s('sb-cli',    cli.nome + (cli.seg ? ` — ${cli.seg}` : ''));
@@ -656,9 +682,10 @@ if (!D || !cli || cli.tpl !== 'medico') {
   s('vg-part-tc',         pct1(part_tc)+'%'); s('vg-part-cpc', brl(part_cpc));
 
   s('vg-cir-n',           num(D.cir_n));
-  s('vg-cir-pct-atend',   pct1(cir_pct_atend)+'% dos atendimentos');
-  s('vg-cir-fat',         brl(D.cir_fat));
-  s('vg-cir-tc',          pct1(cir_tc)+'%'); s('vg-cir-cpc', brl(cir_cpc));
+  s('vg-cir-cpc',         brl(cir_cpc));
+  s('vg-cir-part-n',      num(D.part_n));
+  s('vg-cir-fat-sub',     brl(D.cir_fat||0));
+  s('vg-cir-conv-rate',   pct1(cir_conv_rate)+'%');
   s('vg-fat-tot',  brl(fatTot));
   s('vg-conv-tot', num(convTot));
   s('vg-tc-sub',   'TC Total: ' + pct1(tc_tot) + '%');
@@ -688,11 +715,10 @@ if (!D || !cli || cli.tpl !== 'medico') {
   s('r-part-tca',         pct1(part_tca)+'%');
   s('r-part-cpc',         brl(part_cpc));
 
+  s('r-cir-part-n',       num(D.part_n));
   s('r-cir-n',            num(D.cir_n));
-  s('r-cir-pct-atend',    pct1(cir_pct_atend)+'% dos atendimentos');
   s('r-cir-fat',          brl(D.cir_fat));
-  s('r-cir-tcl',          pct1(cir_tc)+'%');
-  s('r-cir-tca',          pct1(cir_tca)+'%');
+  s('r-cir-conv-rate',    pct1(cir_conv_rate)+'%');
   s('r-cir-cpc',          brl(cir_cpc));
   s('r-fat-tot', brl(fatTot)); s('r-custo-tot', brl(custoTot));
   s('r-roas', pct1(roas)+'x'); s('r-roi', pct1(roi)+'%');
