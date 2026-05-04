@@ -1580,7 +1580,8 @@ const pct  = n => n ? n.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumF
   // Importa dados da URL para localStorage
   if (urlData) {
     try {
-      const decoded = JSON.parse(decodeURIComponent(atob(urlData)));
+      const b64 = urlData.replace(/-/g, '+').replace(/_/g, '/');
+      const decoded = JSON.parse(decodeURIComponent(atob(b64)));
       Object.keys(localStorage).filter(k => k.startsWith('avant2_')).forEach(k => localStorage.removeItem(k));
       for (const [k, v] of Object.entries(decoded)) {
         if (v != null) localStorage.setItem(k, v);

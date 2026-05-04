@@ -852,7 +852,11 @@ const slug   = params.get('slug') || window.location.pathname.split('/').filter(
 const urlData = params.get('d');
 let _urlDecoded = null;
 if (urlData) {
-  try { _urlDecoded = JSON.parse(decodeURIComponent(atob(urlData))); } catch(e) { _urlDecoded = null; }
+  try {
+    // Normaliza base64url (- → +, _ → /) para compatibilidade com links antigos
+    const b64 = urlData.replace(/-/g, '+').replace(/_/g, '/');
+    _urlDecoded = JSON.parse(decodeURIComponent(atob(b64)));
+  } catch(e) { _urlDecoded = null; }
   if (_urlDecoded) {
     // Importa para localStorage
     Object.keys(localStorage).filter(k => k.startsWith('avant2_')).forEach(k => localStorage.removeItem(k));
