@@ -179,6 +179,12 @@ main{flex:1;overflow-y:auto}
 .auth-btn:disabled{opacity:.6;cursor:not-allowed}
 .auth-err{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;
   padding:10px 13px;font-size:12px;color:#dc2626;margin-bottom:14px;display:none}
+.auth-ok{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;
+  padding:10px 13px;font-size:12px;color:#16a34a;margin-bottom:14px;display:none}
+.auth-link{width:100%;background:none;border:none;color:#185FA5;font-family:var(--H);
+  font-size:12px;font-weight:600;cursor:pointer;padding:10px 0 0;text-align:center;
+  text-decoration:underline;opacity:.75;transition:opacity .15s}
+.auth-link:hover{opacity:1}
 .pwd-logout{display:block;margin-top:8px;background:rgba(255,255,255,.1);
   border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.55);
   border-radius:6px;padding:5px 10px;font-size:10px;cursor:pointer;
@@ -203,7 +209,26 @@ main{flex:1;overflow-y:auto}
     <input class="auth-inp" type="password" id="auth-pass" placeholder="Sua senha"
       onkeydown="if(event.key==='Enter')doLogin()">
     <div class="auth-err" id="auth-err">Email ou senha incorretos.</div>
+    <div class="auth-ok" id="auth-ok"></div>
     <button class="auth-btn" id="auth-btn" onclick="doLogin()">Entrar</button>
+    <button class="auth-link" id="forgot-btn" onclick="doForgotPassword()">Esqueci minha senha</button>
+  </div>
+
+  <div class="auth-box" id="recovery-box" style="display:none">
+    <div class="auth-logo">
+      <div class="auth-logo-dot">A</div>
+      <div class="auth-logo-name">Avant Ads</div>
+    </div>
+    <p class="auth-sub">Criar nova senha</p>
+    <div class="auth-lbl">Nova senha</div>
+    <input class="auth-inp" type="password" id="rec-pass" placeholder="Mínimo 6 caracteres"
+      onkeydown="if(event.key==='Enter')document.getElementById('rec-pass2').focus()">
+    <div class="auth-lbl">Confirmar nova senha</div>
+    <input class="auth-inp" type="password" id="rec-pass2" placeholder="Repita a senha"
+      onkeydown="if(event.key==='Enter')doSetNewPassword()">
+    <div class="auth-err" id="rec-err"></div>
+    <div class="auth-ok" id="rec-ok"></div>
+    <button class="auth-btn" id="rec-btn" onclick="doSetNewPassword()">Salvar nova senha</button>
   </div>
 </div>
 
@@ -925,6 +950,69 @@ async function authLogout() {
   await DB.logout();
   location.reload();
 }
+
+async function doForgotPassword() {
+  const email = document.getElementById('auth-email').value.trim();
+  const errEl = document.getElementById('auth-err');
+  const okEl  = document.getElementById('auth-ok');
+  const btn   = document.getElementById('forgot-btn');
+  if (!email) {
+    errEl.textContent = 'Digite seu email antes de continuar.';
+    errEl.style.display = 'block'; okEl.style.display = 'none'; return;
+  }
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  try {
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.href.split('?')[0].split('#')[0]
+    });
+    if (error) throw error;
+    errEl.style.display = 'none';
+    okEl.textContent = `Email enviado para ${email}. Verifique sua caixa de entrada e clique no link para redefinir sua senha.`;
+    okEl.style.display = 'block';
+  } catch(e) {
+    errEl.textContent = 'Erro ao enviar email. Verifique o endereço digitado.';
+    errEl.style.display = 'block'; okEl.style.display = 'none';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Esqueci minha senha';
+  }
+}
+
+async function doSetNewPassword() {
+  const pass  = document.getElementById('rec-pass').value;
+  const pass2 = document.getElementById('rec-pass2').value;
+  const errEl = document.getElementById('rec-err');
+  const okEl  = document.getElementById('rec-ok');
+  const btn   = document.getElementById('rec-btn');
+  if (pass.length < 6) {
+    errEl.textContent = 'A senha deve ter pelo menos 6 caracteres.'; errEl.style.display = 'block'; return;
+  }
+  if (pass !== pass2) {
+    errEl.textContent = 'As senhas não coincidem.'; errEl.style.display = 'block'; return;
+  }
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  try {
+    const { error } = await sb.auth.updateUser({ password: pass });
+    if (error) throw error;
+    errEl.style.display = 'none';
+    okEl.textContent = 'Senha alterada! Redirecionando...';
+    okEl.style.display = 'block';
+    setTimeout(() => location.replace(location.pathname), 1800);
+  } catch(e) {
+    errEl.textContent = 'Erro ao salvar. Tente solicitar um novo link de recuperação.';
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Salvar nova senha';
+  }
+}
+
+// Detecta link de recuperação de senha (após clicar no email)
+sb.auth.onAuthStateChange((event) => {
+  if (event === 'PASSWORD_RECOVERY') {
+    document.getElementById('auth-screen').style.display = 'flex';
+    document.querySelector('.auth-box').style.display = 'none';
+    document.getElementById('recovery-box').style.display = 'block';
+  }
+});
 
 authCheck();
 </script>
