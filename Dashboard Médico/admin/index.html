@@ -398,8 +398,10 @@ main{flex:1;overflow-y:auto}
 
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../assets/supabase-db.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="../assets/firebase-db.js"></script>
 <script>
 document.getElementById('sb-yr').textContent = new Date().getFullYear();
 
@@ -902,20 +904,21 @@ function applyRoleRestrictions() {
   document.getElementById('tb-right').style.display = 'none';
 }
 
-async function authCheck() {
-  const session = await DB.getSession();
-  if (session) {
-    currentRole = session.user?.user_metadata?.role || 'colab';
-    document.getElementById('auth-screen').style.display = 'none';
-    const labels = { admin: 'Admin', colab: 'Colaborador' };
-    const lbl = document.getElementById('sb-user-lbl');
-    if (lbl) lbl.textContent = labels[currentRole] || currentRole;
-    applyRoleRestrictions();
-    // carrega URL salva no config
-    const url = await DB.getConfig('url');
-    if (url) document.getElementById('cfg-url').value = url;
-    renderDash();
-  }
+function authCheck() {
+  const unsub = auth.onAuthStateChanged(async (user) => {
+    unsub();
+    if (user) {
+      currentRole = await DB.getRole();
+      document.getElementById('auth-screen').style.display = 'none';
+      const labels = { admin: 'Admin', colab: 'Colaborador' };
+      const lbl = document.getElementById('sb-user-lbl');
+      if (lbl) lbl.textContent = labels[currentRole] || currentRole;
+      applyRoleRestrictions();
+      const url = await DB.getConfig('url');
+      if (url) document.getElementById('cfg-url').value = url;
+      renderDash();
+    }
+  });
 }
 
 async function doLogin() {
@@ -926,8 +929,8 @@ async function doLogin() {
   if (!email || !pass) { errEl.textContent='Preencha email e senha.'; errEl.style.display='block'; return; }
   btn.disabled = true; btn.textContent = 'Entrando...';
   try {
-    const { user } = await DB.login(email, pass);
-    currentRole = user?.user_metadata?.role || 'colab';
+    await DB.login(email, pass);
+    currentRole = await DB.getRole();
     document.getElementById('auth-screen').style.display = 'none';
     const labels = { admin: 'Admin', colab: 'Colaborador' };
     const lbl = document.getElementById('sb-user-lbl');
@@ -962,10 +965,7 @@ async function doForgotPassword() {
   }
   btn.disabled = true; btn.textContent = 'Enviando...';
   try {
-    const { error } = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.href.split('?')[0].split('#')[0]
-    });
-    if (error) throw error;
+    await auth.sendPasswordResetEmail(email);
     errEl.style.display = 'none';
     okEl.textContent = `Email enviado para ${email}. Verifique sua caixa de entrada e clique no link para redefinir sua senha.`;
     okEl.style.display = 'block';
@@ -991,8 +991,7 @@ async function doSetNewPassword() {
   }
   btn.disabled = true; btn.textContent = 'Salvando...';
   try {
-    const { error } = await sb.auth.updateUser({ password: pass });
-    if (error) throw error;
+    await auth.currentUser.updatePassword(pass);
     errEl.style.display = 'none';
     okEl.textContent = 'Senha alterada! Redirecionando...';
     okEl.style.display = 'block';
@@ -1005,14 +1004,6 @@ async function doSetNewPassword() {
   }
 }
 
-// Detecta link de recuperação de senha (após clicar no email)
-sb.auth.onAuthStateChange((event) => {
-  if (event === 'PASSWORD_RECOVERY') {
-    document.getElementById('auth-screen').style.display = 'flex';
-    document.querySelector('.auth-box').style.display = 'none';
-    document.getElementById('recovery-box').style.display = 'block';
-  }
-});
 
 authCheck();
 </script>
