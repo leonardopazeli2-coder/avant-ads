@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Carregando relatório...</title>
+<style>
+body{font-family:'Outfit',sans-serif;background:#0a0e17;color:#e2e8f0;
+  display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
+.loader{text-align:center}
+.spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.1);
+  border-top-color:#00e5a0;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+p{font-size:13px;color:#94a3b8}
+</style>
+</head>
+<body>
+<div class="loader">
+  <div class="spinner"></div>
+  <p>Carregando relatório...</p>
+</div>
+<script src="../assets/db.js"></script>
+<script>
+const slug = window.location.pathname.split('/').filter(Boolean).pop();
+const cli  = DB.getCliente(slug);
+
+if (!cli) {
+  document.querySelector('p').textContent = 'Relatório não encontrado.';
+} else {
+  const tpl = cli.tpl || 'geral';
+  const base = window.location.pathname.replace(slug, '');
+  if (tpl === 'medico') {
+    window.location.replace(base + 'medico.html?slug=' + slug);
+  } else {
+    window.location.replace(base + 'geral.html?slug=' + slug);
+  }
+}
+</script>
+</body>
+</html>

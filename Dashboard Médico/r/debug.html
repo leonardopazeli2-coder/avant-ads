@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Debug — Avant Ads</title>
+<style>
+body{font-family:monospace;padding:20px;background:#0a0e17;color:#e2e8f0}
+h2{color:#00e5a0;margin-bottom:16px}
+.box{background:#131c2e;border:1px solid #1e3352;border-radius:8px;padding:16px;margin-bottom:16px}
+.ok{color:#00e5a0}.err{color:#f43f5e}.warn{color:#f59e0b}
+pre{white-space:pre-wrap;word-break:break-all;font-size:11px;margin-top:8px}
+button{background:#00e5a0;color:#0a0e17;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:700;margin:4px}
+input{width:100%;background:#0f1520;border:1px solid #1e3352;border-radius:6px;padding:8px;color:#e2e8f0;font-family:monospace;font-size:11px;margin-top:6px}
+</style>
+</head>
+<body>
+<h2>🔍 Avant Ads — Diagnóstico</h2>
+
+<div class="box">
+  <b>1. URL atual</b>
+  <pre id="url-atual"></pre>
+</div>
+
+<div class="box">
+  <b>2. Parâmetros da URL</b>
+  <pre id="url-params"></pre>
+</div>
+
+<div class="box">
+  <b>3. Decode do parâmetro "d"</b>
+  <pre id="decode-result"></pre>
+</div>
+
+<div class="box">
+  <b>4. localStorage atual (chaves avant2_*)</b>
+  <pre id="ls-keys"></pre>
+</div>
+
+<div class="box">
+  <b>5. Importar dados manualmente</b>
+  <p style="font-size:12px;color:#94a3b8;margin-bottom:8px">Cole a URL completa do relatório aqui e clique em Importar:</p>
+  <input type="text" id="manual-url" placeholder="https://...?slug=...&d=...">
+  <br><br>
+  <button onclick="importManual()">⬇ Importar dados da URL</button>
+  <button onclick="clearLS()">🗑 Limpar localStorage</button>
+  <pre id="import-result"></pre>
+</div>
+
+<div class="box">
+  <b>6. Testar abertura do relatório</b>
+  <button onclick="abrirRel()">Abrir relatório médico →</button>
+</div>
+
+<script src="../assets/db.js"></script>
+<script>
+const params = new URLSearchParams(window.location.search);
+const slug   = params.get('slug');
+
+document.getElementById('url-atual').textContent = window.location.href;
+
+// Params
+let paramsStr = '';
+params.forEach((v, k) => {
+  paramsStr += `${k} = ${k === 'd' ? v.substring(0,80)+'...('+v.length+' chars)' : v}\n`;
+});
+document.getElementById('url-params').textContent = paramsStr || '(nenhum parâmetro)';
+
+// Decode
+const d = params.get('d');
+const decEl = document.getElementById('decode-result');
+if (!d) {
+  decEl.innerHTML = '<span class="warn">Parâmetro "d" não encontrado na URL</span>';
+} else {
+  try {
+    // Tentativa 1: novo método
+    let jsonStr, decoded;
+    try {
+      jsonStr = decodeURIComponent(escape(atob(decodeURIComponent(d))));
+      decoded = JSON.parse(jsonStr);
+      decEl.innerHTML = '<span class="ok">✓ Decode OK (método novo)</span>\n';
+    } catch(e1) {
+      // Tentativa 2: método antigo
+      try {
+        jsonStr = JSON.parse(decodeURIComponent(atob(d)));
+        decoded = jsonStr;
+        decEl.innerHTML = '<span class="warn">✓ Decode OK (método antigo)</span>\n';
+      } catch(e2) {
+        // Tentativa 3: só atob
+        try {
+          decoded = JSON.parse(atob(d));
+          decEl.innerHTML = '<span class="warn">✓ Decode OK (só atob)</span>\n';
+        } catch(e3) {
+          decEl.innerHTML = `<span class="err">✗ Todos os métodos falharam:\n  ${e1}\n  ${e2}\n  ${e3}</span>`;
+          decoded = null;
+        }
+      }
+    }
+
+    if (decoded) {
+      decEl.innerHTML += `Chaves encontradas (${Object.keys(decoded).length}):\n`;
+      Object.keys(decoded).forEach(k => {
+        const v = decoded[k];
+        decEl.innerHTML += `  <span class="ok">${k}</span> → ${String(v).substring(0,80)}...\n`;
+      });
+
+      // Auto-importar
+      Object.entries(decoded).forEach(([k, v]) => {
+        if (v) localStorage.setItem(k, v);
+      });
+      decEl.innerHTML += '\n<span class="ok">✓ Dados importados automaticamente para localStorage</span>';
+    }
+  } catch(e) {
+    decEl.innerHTML = `<span class="err">Erro geral: ${e}</span>`;
+  }
+}
+
+// localStorage
+function showLS() {
+  const lsEl = document.getElementById('ls-keys');
+  const keys = Object.keys(localStorage).filter(k => k.startsWith('avant2_'));
+  if (!keys.length) {
+    lsEl.innerHTML = '<span class="warn">Nenhuma chave avant2_* no localStorage</span>';
+  } else {
+    lsEl.innerHTML = keys.map(k => {
+      const v = localStorage.getItem(k);
+      return `<span class="ok">${k}</span>\n  → ${v?.substring(0,120)}...\n`;
+    }).join('\n');
+  }
+}
+showLS();
+
+function importManual() {
+  const url = document.getElementById('manual-url').value.trim();
+  const res = document.getElementById('import-result');
+  try {
+    const p = new URLSearchParams(new URL(url).search);
+    const dVal = p.get('d');
+    const slugVal = p.get('slug');
+    if (!dVal) { res.innerHTML = '<span class="err">Parâmetro "d" não encontrado na URL</span>'; return; }
+
+    // Tenta todos os métodos de decode
+    let decoded = null;
+    const methods = [
+      () => JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(dVal))))),
+      () => JSON.parse(decodeURIComponent(atob(dVal))),
+      () => JSON.parse(atob(dVal)),
+      () => JSON.parse(decodeURIComponent(escape(atob(dVal)))),
+    ];
+    for (const m of methods) {
+      try { decoded = m(); break; } catch(e) {}
+    }
+
+    if (!decoded) { res.innerHTML = '<span class="err">Não foi possível decodificar os dados</span>'; return; }
+
+    Object.entries(decoded).forEach(([k, v]) => { if (v) localStorage.setItem(k, v); });
+    res.innerHTML = `<span class="ok">✓ Importado! Chaves: ${Object.keys(decoded).join(', ')}</span>`;
+    showLS();
+  } catch(e) {
+    res.innerHTML = `<span class="err">Erro: ${e}</span>`;
+  }
+}
+
+function clearLS() {
+  Object.keys(localStorage).filter(k => k.startsWith('avant2_')).forEach(k => localStorage.removeItem(k));
+  showLS();
+  document.getElementById('import-result').innerHTML = '<span class="warn">localStorage limpo</span>';
+}
+
+function abrirRel() {
+  const s = slug || prompt('Slug do cliente:');
+  if (s) window.location.href = `medico.html?slug=${s}`;
+}
+</script>
+</body>
+</html>
