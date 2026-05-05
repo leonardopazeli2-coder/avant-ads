@@ -669,8 +669,7 @@ const FIELDS_MED = [
     {id:'orcamento',label:'Orçamento Total (R$)',tp:'number',ph:'0'},
   ]},
   { sec:'💰 Investimento & Funil', fields:[
-    {id:'anuncios_meta',label:'Anúncios Meta Ads (R$)',tp:'number',ph:'0'},
-    {id:'impostos',label:'Impostos sobre Anúncios (R$)',tp:'number',ph:'0'},
+    {id:'invest_bruto',label:'Investimento Bruto (R$)',tp:'number',ph:'0'},
     {id:'invest',label:'Investimento Líquido (R$)',tp:'number',ph:'0'},
     {id:'atend',label:'Total Atendimentos',tp:'number',ph:'0'},
     {id:'leads',label:'Leads Únicos',tp:'number',ph:'0'},
@@ -812,9 +811,6 @@ async function saveRel(slug, mes) {
     const el = document.getElementById('f_'+f.id); if(!el) return;
     data[f.id] = f.tp==='number' ? (parseFloat(el.value)||0) : el.value.trim();
   }));
-  if (tpl === 'medico') {
-    data.invest_bruto = (data.anuncios_meta || 0) + (data.impostos || 0);
-  }
   try {
     await DB.saveRel(slug, mes, data);
     toast('✓ Salvo!'); renderDash();
