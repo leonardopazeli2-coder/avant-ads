@@ -938,7 +938,7 @@ function renderMes(mes) {
   const fatTot  = (D.part_fat||0) + (D.cir_fat||0); // convênio não tem faturamento neste relatório
   const custoTot= (D.invest_bruto||0) + (D.custo_agencia||0) + (D.custo_crm||0) + (D.custo_outros||0);
   const roas    = D.invest > 0 ? fatTot / D.invest : 0;
-  const roi     = custoTot > 0 ? (fatTot - custoTot) / custoTot * 100 : 0;
+  const roi     = custoTot > 0 ? fatTot / custoTot : 0;
   const cpl     = D.leads > 0 ? (D.invest||0) / D.leads : 0;
   const cmql    = D.mql   > 0 ? (D.invest||0) / D.mql   : 0;
   const cat     = D.atend > 0 ? (D.invest||0) / D.atend  : 0;
@@ -989,7 +989,7 @@ function renderMes(mes) {
   s('vg-conv-tot', num(convTot));
   s('vg-tc-sub',   'TC Total: ' + pct1(tc_tot) + '%');
   s('vg-roas',     pct1(roas) + 'x');
-  s('vg-roi',      pct1(roi / 100) + 'x');
+  s('vg-roi',      pct1(roi) + 'x');
 
   // FUNIL VISUAL
   const maxF   = Math.max(D.atend||0, 1);
@@ -1175,8 +1175,8 @@ function renderAnual(slug) {
   });
   const roiArr  = rels.map(r => {
     const ft = (r.part_fat||0)+(r.cir_fat||0);
-    const ct = (r.invest||0)+(r.custo_agencia||0)+(r.custo_crm||0)+(r.custo_outros||0);
-    return ct > 0 ? (ft-ct)/ct : 0;
+    const ct = (r.invest_bruto||0)+(r.custo_agencia||0)+(r.custo_crm||0)+(r.custo_outros||0);
+    return ct > 0 ? ft/ct : 0;
   });
 
   const BASE = {
